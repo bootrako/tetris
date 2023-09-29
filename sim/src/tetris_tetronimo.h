@@ -4,33 +4,43 @@
 #include "tetris_utils.h"
 #include <stdbool.h>
 
-typedef struct tetris_grid_t tetris_grid;
+typedef struct tetris_matrix_t tetris_matrix;
 
-typedef uint8_t tetris_tetronimo_row;
-
+// config
+#define TETRIS_TETRONIMO_MAX_WIDTH 4
 #define TETRIS_TETRONIMO_MAX_HEIGHT 4
+typedef uint8_t tetris_tetronimo_row;           // needs to have enough bits to hold tetronimo max width
 
 typedef struct tetris_tetronimo_rotation_t {
     tetris_tetronimo_row rows[TETRIS_TETRONIMO_MAX_HEIGHT];
 } tetris_tetronimo_rotation;
 
 typedef struct tetris_tetronimo_t {
-    const tetris_tetronimo_rotation* rotations;
-    int num_rotations;
-    int current_rotation;
-    int x;
-    int y;
-    bool is_grounded;
+    const tetris_tetronimo_rotation* rotations; // points to different configurations of the tetronimo representing its rotations
+    int num_rotations;                          // how many rotations this tetronimo has
+    int current_rotation;                       // the index of the current rotation
+    int x;                                      // the x position (matrix space) of the tetronimo
+    int y;                                      // the y position (matrix space) of the tetronimo
+    bool is_grounded;                           // true when the tetronimo has hit another tetronimo (or the matrix floor) below it
 } tetris_tetronimo;
 
 typedef struct {
-    tetris_rand rand;
+    tetris_rand rand;                           // random number generator
 } tetris_tetronimo_spawner;
 
-void tetris_tetronimo_init(tetris_tetronimo* tetronimo, const tetris_grid* grid, tetris_tetronimo_spawner* spawner);
-void tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_grid* grid, const int dir_x, const int dir_y);
+// creates a new tetronimo using the spawner and does an initial collision check
+void tetris_tetronimo_init(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, tetris_tetronimo_spawner* spawner);
 
+// attempts to move the tetronimo. if a collision happens, the move might not do anything.
+void tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_x, const int dir_y);
+
+// given an x and y in tetronimo coordinates, returns true if the bit is set in the tetronimo, based on its current rotation
+bool tetris_tetronimo_get_value(const tetris_tetronimo* tetronimo, const int x, const int y);
+
+// initializes a tetronimo spawner with a RNG seed.
 void tetris_tetronimo_spawner_init(tetris_tetronimo_spawner* spawner, const uint64_t seed);
+
+// randomly generate a new tetronimo
 tetris_tetronimo tetris_tetronimo_spawner_next(tetris_tetronimo_spawner* spawner);
 
 #endif // TETRIS_TETRONIMO_H

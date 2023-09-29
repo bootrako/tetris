@@ -1,5 +1,5 @@
 #include "tetris_tetronimo.h"
-#include "tetris_grid.h"
+#include "tetris_matrix.h"
 #include "tetris_utils.h"
 
 // . . . .  0000
@@ -80,12 +80,12 @@ const tetris_tetronimo k_tetronimoes[] = {
     { .rotations = k_tetronimo_l, .num_rotations = TETRIS_ARRAY_LEN(k_tetronimo_l) },
 };
 
-const int tetris_player_start_x = 5;
-const int tetris_player_start_y = 4;
+const int tetris_player_start_x = 4;
+const int tetris_player_start_y = 0;
 
-static bool tetris_tetronimo_resolve_collisions(tetris_tetronimo* tetronimo, const tetris_grid* grid, int dir_x, int dir_y) {
+static bool tetris_tetronimo_resolve_collisions(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, int dir_x, int dir_y) {
     bool has_collisions = false;
-    while (tetris_grid_collide(grid, tetronimo)) {
+    while (tetris_matrix_collide(matrix, tetronimo)) {
         tetronimo->x -= dir_x;
         tetronimo->y -= dir_y;
         has_collisions = true;
@@ -94,20 +94,24 @@ static bool tetris_tetronimo_resolve_collisions(tetris_tetronimo* tetronimo, con
     return has_collisions;
 }
 
-void tetris_tetronimo_init(tetris_tetronimo* tetronimo, const tetris_grid* grid, tetris_tetronimo_spawner* spawner) {
+void tetris_tetronimo_init(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, tetris_tetronimo_spawner* spawner) {
     *tetronimo = tetris_tetronimo_spawner_next(spawner);
     tetronimo->x = tetris_player_start_x;
     tetronimo->y = tetris_player_start_y;
-    tetronimo->is_grounded = tetris_tetronimo_resolve_collisions(tetronimo, grid, 0, 1);
+    tetronimo->is_grounded = tetris_tetronimo_resolve_collisions(tetronimo, matrix, 0, 1);
 }
 
-void tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_grid* grid, const int dir_x, const int dir_y) {
+void tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_x, const int dir_y) {
     tetronimo->x += dir_x;
     tetronimo->y += dir_y;
-    const bool has_collisions = tetris_tetronimo_resolve_collisions(tetronimo, grid, dir_x, dir_y);
+    const bool has_collisions = tetris_tetronimo_resolve_collisions(tetronimo, matrix, dir_x, dir_y);
     if (dir_y == 1) {
         tetronimo->is_grounded = has_collisions;
     }
+}
+
+bool tetris_tetronimo_get_value(const tetris_tetronimo* tetronimo, const int x, const int y) {
+    return (tetronimo->rotations[tetronimo->current_rotation].rows[y] >> (TETRIS_TETRONIMO_MAX_WIDTH - 1 - x)) & 1;
 }
 
 void tetris_tetronimo_spawner_init(tetris_tetronimo_spawner* spawner, const uint64_t seed) {
