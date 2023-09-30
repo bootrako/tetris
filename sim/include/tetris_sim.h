@@ -1,13 +1,33 @@
 #ifndef TETRIS_SIM_H
 #define TETRIS_SIM_H
 
-#include "tetris_host.h"
 #include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+
+typedef enum tetris_input_action_t {
+    TETRIS_INPUT_ACTION_MOVE_LEFT,
+    TETRIS_INPUT_ACTION_MOVE_RIGHT,
+    TETRIS_INPUT_ACTION_MOVE_DOWN,
+    TETRIS_INPUT_ACTION_MOVE_DROP,
+    TETRIS_INPUT_ACTION_ROTATE_LEFT,
+    TETRIS_INPUT_ACTION_ROTATE_RIGHT,
+    TETRIS_INPUT_ACTION_COUNT
+} tetris_input_action;
+
+typedef struct {
+    void*(*alloc)(void* context, size_t size);                              // allocate memory with the given size
+    void(*free)(void* context, void* ptr);                                  // free allocated memory
+    float(*time)(void* context);                                            // get a high resolution, monotonically-increasing timestamp
+    uint64_t(*seed)(void* context);                                         // get a value that can be used as a seed in a random number generator
+    bool(*input_pressed)(void* context, tetris_input_action input_action);  // returns true if an input action is currently active
+    void* context;                                                          // context object for storing host data
+} tetris_sim_host;
 
 typedef struct tetris_sim tetris_sim;
 
 // initializes the simulation. internally allocates memory that can only be freed by calling deinit
-tetris_sim* tetris_sim_init(tetris_host host);
+tetris_sim* tetris_sim_init(tetris_sim_host host);
 
 // deinitialize the simulation. must be called on a sim pointer that was created with init
 void tetris_sim_deinit(tetris_sim* sim);
