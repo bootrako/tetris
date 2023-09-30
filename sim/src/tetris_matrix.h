@@ -22,7 +22,7 @@ void tetris_matrix_init(tetris_matrix* matrix);
 void tetris_matrix_merge(tetris_matrix* matrix, const tetris_tetronimo* tetronimo);
 
 // returns true if the tetronimo is overlapping a set bit on the matrix, or if the tetronimo is out of bounds.
-bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo);
+bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo, const bool bounds_only);
 
 // given an x and y in matrix coordinates, returns true if the bit is set in the matrix
 bool tetris_matrix_get_value(const tetris_matrix* matrix, const int x, const int y);

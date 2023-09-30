@@ -80,24 +80,30 @@ const tetris_tetronimo k_tetronimoes[] = {
     { .rotations = k_tetronimo_l, .num_rotations = TETRIS_ARRAY_LEN(k_tetronimo_l) },
 };
 
-const int tetris_player_start_x = 4;
-const int tetris_player_start_y = 0;
+#define TETRIS_TETRONIMO_INIT_X (4)
+#define TETRIS_TETRONIMO_INIT_Y (0)
 
 static bool tetris_tetronimo_resolve_collisions(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, int dir_x, int dir_y) {
     bool has_collisions = false;
-    while (tetris_matrix_collide(matrix, tetronimo)) {
+    while (tetris_matrix_collide(matrix, tetronimo, false)) {
         tetronimo->x -= dir_x;
         tetronimo->y -= dir_y;
         has_collisions = true;
-        // probably should assert or something here to prevent an infinite loop
     }
     return has_collisions;
 }
 
+static void tetris_tetronimo_resolve_out_of_bounds(tetris_tetronimo* tetronimo, const tetris_matrix* matrix) {
+    const int dir = (tetronimo->x < TETRIS_MATRIX_WIDTH - tetronimo->x) ? 1 : -1;
+    while (tetris_matrix_collide(matrix, tetronimo, true)) {
+        tetronimo->x += dir;
+    }
+}
+
 void tetris_tetronimo_init(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, tetris_tetronimo_spawner* spawner) {
     *tetronimo = tetris_tetronimo_spawner_next(spawner);
-    tetronimo->x = tetris_player_start_x;
-    tetronimo->y = tetris_player_start_y;
+    tetronimo->x = TETRIS_TETRONIMO_INIT_X;
+    tetronimo->y = TETRIS_TETRONIMO_INIT_Y;
     tetronimo->is_grounded = tetris_tetronimo_resolve_collisions(tetronimo, matrix, 0, 1);
 }
 
@@ -108,6 +114,12 @@ void tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_matrix* mat
     if (dir_y == 1) {
         tetronimo->is_grounded = has_collisions;
     }
+}
+
+void tetris_tetronimo_rotate(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_rot) {
+    tetronimo->current_rotation = (tetronimo->current_rotation + dir_rot + tetronimo->num_rotations) % tetronimo->num_rotations;
+    tetris_tetronimo_resolve_out_of_bounds(tetronimo, matrix);
+    tetronimo->is_grounded = tetris_tetronimo_resolve_collisions(tetronimo, matrix, 0, 1);
 }
 
 bool tetris_tetronimo_get_value(const tetris_tetronimo* tetronimo, const int x, const int y) {

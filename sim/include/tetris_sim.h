@@ -5,23 +5,22 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef enum tetris_input_action_t {
-    TETRIS_INPUT_ACTION_MOVE_LEFT,
-    TETRIS_INPUT_ACTION_MOVE_RIGHT,
-    TETRIS_INPUT_ACTION_MOVE_DOWN,
-    TETRIS_INPUT_ACTION_MOVE_DROP,
-    TETRIS_INPUT_ACTION_ROTATE_LEFT,
-    TETRIS_INPUT_ACTION_ROTATE_RIGHT,
-    TETRIS_INPUT_ACTION_COUNT
-} tetris_input_action;
+typedef enum tetris_input_t {
+    TETRIS_INPUT_MOVE_LEFT,
+    TETRIS_INPUT_MOVE_RIGHT,
+    TETRIS_INPUT_FAST_FALL,
+    TETRIS_INPUT_ROTATE_LEFT,
+    TETRIS_INPUT_ROTATE_RIGHT,
+    TETRIS_INPUT_COUNT
+} tetris_input;
 
 typedef struct {
-    void*(*alloc)(void* context, size_t size);                              // allocate memory with the given size
-    void(*free)(void* context, void* ptr);                                  // free allocated memory
-    float(*time)(void* context);                                            // get a high resolution, monotonically-increasing timestamp
-    uint64_t(*seed)(void* context);                                         // get a value that can be used as a seed in a random number generator
-    bool(*input_pressed)(void* context, tetris_input_action input_action);  // returns true if an input action is currently active
-    void* context;                                                          // context object for storing host data
+    void*(*alloc)(void* context, size_t size);                  // allocate memory with the given size
+    void(*free)(void* context, void* ptr);                      // free allocated memory
+    float(*time)(void* context);                                // get a high resolution, monotonically-increasing timestamp
+    uint64_t(*seed)(void* context);                             // get a value that can be used as a seed in a random number generator
+    bool(*input_pressed)(void* context, tetris_input input);    // returns true if an input action is currently active
+    void* context;                                              // context object for storing host data
 } tetris_sim_host;
 
 typedef struct tetris_sim tetris_sim;

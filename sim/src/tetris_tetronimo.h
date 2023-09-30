@@ -34,6 +34,9 @@ void tetris_tetronimo_init(tetris_tetronimo* tetronimo, const tetris_matrix* mat
 // attempts to move the tetronimo. if a collision happens, the move might not do anything.
 void tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_x, const int dir_y);
 
+// rotates the tetronimo, then tries to find an available space if there is a collision
+void tetris_tetronimo_rotate(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_rot);
+
 // given an x and y in tetronimo coordinates, returns true if the bit is set in the tetronimo, based on its current rotation
 bool tetris_tetronimo_get_value(const tetris_tetronimo* tetronimo, const int x, const int y);
 
