@@ -65,7 +65,7 @@ static bool console_input_vk_pressed(int vk) {
 static void console_host_context_update(console_host_context* host_context) {
     host_context->input_pressed[TETRIS_INPUT_MOVE_LEFT] = console_input_vk_pressed(CONSOLE_INPUT_VK_A) | console_input_vk_pressed(CONSOLE_INPUT_VK_LEFT);
     host_context->input_pressed[TETRIS_INPUT_MOVE_RIGHT] = console_input_vk_pressed(CONSOLE_INPUT_VK_D) | console_input_vk_pressed(CONSOLE_INPUT_VK_RIGHT);
-    host_context->input_pressed[TETRIS_INPUT_FAST_FALL] = console_input_vk_pressed(CONSOLE_INPUT_VK_S) | console_input_vk_pressed(CONSOLE_INPUT_VK_DOWN);
+    host_context->input_pressed[TETRIS_INPUT_FAST_DROP] = console_input_vk_pressed(CONSOLE_INPUT_VK_S) | console_input_vk_pressed(CONSOLE_INPUT_VK_DOWN);
     host_context->input_pressed[TETRIS_INPUT_ROTATE_LEFT] = console_input_vk_pressed(CONSOLE_INPUT_VK_O) | console_input_vk_pressed(CONSOLE_INPUT_VK_Z);
     host_context->input_pressed[TETRIS_INPUT_ROTATE_RIGHT] = console_input_vk_pressed(CONSOLE_INPUT_VK_P) | console_input_vk_pressed(CONSOLE_INPUT_VK_X);
 }
@@ -139,6 +139,9 @@ static void console_render_draw_matrix(console_render* render, const tetris_sim*
 }
 
 static void console_render_draw_tetronimo(console_render* render, const tetris_sim* sim, const int tetronimo_max_width, const int tetronimo_max_height) {
+    if (!tetris_sim_is_tetronimo_active(sim)) {
+        return;
+    }
     const int tetronimo_x = tetris_sim_get_tetronimo_pos_x(sim);
     const int tetronimo_y = tetris_sim_get_tetronimo_pos_y(sim); 
     for (int y = 0; y < tetronimo_max_height; ++y) {

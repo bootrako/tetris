@@ -22,6 +22,7 @@ typedef struct tetris_tetronimo_t {
     int x;                                      // the x position (matrix space) of the tetronimo
     int y;                                      // the y position (matrix space) of the tetronimo
     bool is_grounded;                           // true when the tetronimo has hit another tetronimo (or the matrix floor) below it
+    bool is_active;                             // true when the tetronimo is active in the matrix
 } tetris_tetronimo;
 
 typedef struct {

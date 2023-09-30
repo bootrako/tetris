@@ -8,7 +8,7 @@
 typedef enum tetris_input_t {
     TETRIS_INPUT_MOVE_LEFT,
     TETRIS_INPUT_MOVE_RIGHT,
-    TETRIS_INPUT_FAST_FALL,
+    TETRIS_INPUT_FAST_DROP,
     TETRIS_INPUT_ROTATE_LEFT,
     TETRIS_INPUT_ROTATE_RIGHT,
     TETRIS_INPUT_COUNT
@@ -19,7 +19,7 @@ typedef struct {
     void(*free)(void* context, void* ptr);                      // free allocated memory
     float(*time)(void* context);                                // get a high resolution, monotonically-increasing timestamp
     uint64_t(*seed)(void* context);                             // get a value that can be used as a seed in a random number generator
-    bool(*input_pressed)(void* context, tetris_input input);    // returns true if an input action is currently active
+    bool(*input_pressed)(void* context, tetris_input input);    // returns true if an input is currently pressed
     void* context;                                              // context object for storing host data
 } tetris_sim_host;
 
@@ -45,6 +45,9 @@ int tetris_sim_get_matrix_height(const tetris_sim* sim);
 
 // returns true if a cell in the play field is occupied by a piece of tetronimo
 bool tetris_sim_get_matrix_value(const tetris_sim* sim, int x, int y);
+
+// returns true if the tetronimo is active in the matrix
+bool tetris_sim_is_tetronimo_active(const tetris_sim* sim);
 
 // get the max width of a tetronimo piece. pieces can be smaller than the max width
 int tetris_sim_get_tetronimo_max_width(const tetris_sim* sim);
