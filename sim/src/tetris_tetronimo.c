@@ -105,6 +105,7 @@ void tetris_tetronimo_init(tetris_tetronimo* tetronimo, const tetris_matrix* mat
     tetronimo->x = TETRIS_TETRONIMO_INIT_X;
     tetronimo->y = TETRIS_TETRONIMO_INIT_Y;
     tetronimo->is_grounded = tetris_tetronimo_resolve_collisions(tetronimo, matrix, 0, 1);
+    tetronimo->is_active = true;
 }
 
 void tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_x, const int dir_y) {
