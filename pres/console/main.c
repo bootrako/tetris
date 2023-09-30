@@ -3,21 +3,19 @@
 
 #define CONSOLE_INPUT_VK_A (0x41)
 #define CONSOLE_INPUT_VK_D (0x44)
-#define CONSOLE_INPUT_VK_E (0x45)
-#define CONSOLE_INPUT_VK_Q (0x51)
+#define CONSOLE_INPUT_VK_O (0x4F)
+#define CONSOLE_INPUT_VK_P (0x50)
 #define CONSOLE_INPUT_VK_S (0x53)
-#define CONSOLE_INPUT_VK_W (0x57)
 #define CONSOLE_INPUT_VK_X (0x58)
 #define CONSOLE_INPUT_VK_Z (0x5A)
 #define CONSOLE_INPUT_VK_LEFT (VK_LEFT)
 #define CONSOLE_INPUT_VK_RIGHT (VK_RIGHT)
-#define CONSOLE_INPUT_VK_UP (VK_UP)
 #define CONSOLE_INPUT_VK_DOWN (VK_DOWN)
 
 typedef struct console_host_context_t {
     LARGE_INTEGER counter_start;
     LARGE_INTEGER counter_frequency;
-    bool input_pressed[TETRIS_INPUT_ACTION_COUNT];
+    bool input_pressed[TETRIS_INPUT_COUNT];
 } console_host_context;
 
 static void* console_host_alloc(void* context, size_t size) {
@@ -41,16 +39,16 @@ static uint64_t console_host_seed(void* context) {
     return (ULARGE_INTEGER){ .LowPart = system_time.dwLowDateTime, .HighPart = system_time.dwHighDateTime }.QuadPart;
 }
 
-static bool console_host_input_pressed(void* context, tetris_input_action input_action) {
+static bool console_host_input_pressed(void* context, tetris_input input) {
     console_host_context* host_context = (console_host_context*)context;
-    return host_context->input_pressed[input_action];
+    return host_context->input_pressed[input];
 }
 
 static console_host_context* console_host_context_init() {
     console_host_context* host_context = (console_host_context*)malloc(sizeof(console_host_context));
     QueryPerformanceCounter(&host_context->counter_start);
     QueryPerformanceFrequency(&host_context->counter_frequency);
-    for (int i = 0; i < TETRIS_INPUT_ACTION_COUNT; ++i) {
+    for (int i = 0; i < TETRIS_INPUT_COUNT; ++i) {
         host_context->input_pressed[i] = false;
     }
     return host_context;
@@ -65,12 +63,11 @@ static bool console_input_vk_pressed(int vk) {
 }
 
 static void console_host_context_update(console_host_context* host_context) {
-    host_context->input_pressed[TETRIS_INPUT_ACTION_MOVE_LEFT] = console_input_vk_pressed(CONSOLE_INPUT_VK_A) | console_input_vk_pressed(CONSOLE_INPUT_VK_LEFT);
-    host_context->input_pressed[TETRIS_INPUT_ACTION_MOVE_RIGHT] = console_input_vk_pressed(CONSOLE_INPUT_VK_D) | console_input_vk_pressed(CONSOLE_INPUT_VK_RIGHT);
-    host_context->input_pressed[TETRIS_INPUT_ACTION_MOVE_DOWN] = console_input_vk_pressed(CONSOLE_INPUT_VK_S) | console_input_vk_pressed(CONSOLE_INPUT_VK_DOWN);
-    host_context->input_pressed[TETRIS_INPUT_ACTION_MOVE_DROP] = console_input_vk_pressed(CONSOLE_INPUT_VK_W) | console_input_vk_pressed(CONSOLE_INPUT_VK_UP);
-    host_context->input_pressed[TETRIS_INPUT_ACTION_ROTATE_LEFT] = console_input_vk_pressed(CONSOLE_INPUT_VK_Q) | console_input_vk_pressed(CONSOLE_INPUT_VK_Z);
-    host_context->input_pressed[TETRIS_INPUT_ACTION_ROTATE_RIGHT] = console_input_vk_pressed(CONSOLE_INPUT_VK_E) | console_input_vk_pressed(CONSOLE_INPUT_VK_X);
+    host_context->input_pressed[TETRIS_INPUT_MOVE_LEFT] = console_input_vk_pressed(CONSOLE_INPUT_VK_A) | console_input_vk_pressed(CONSOLE_INPUT_VK_LEFT);
+    host_context->input_pressed[TETRIS_INPUT_MOVE_RIGHT] = console_input_vk_pressed(CONSOLE_INPUT_VK_D) | console_input_vk_pressed(CONSOLE_INPUT_VK_RIGHT);
+    host_context->input_pressed[TETRIS_INPUT_FAST_FALL] = console_input_vk_pressed(CONSOLE_INPUT_VK_S) | console_input_vk_pressed(CONSOLE_INPUT_VK_DOWN);
+    host_context->input_pressed[TETRIS_INPUT_ROTATE_LEFT] = console_input_vk_pressed(CONSOLE_INPUT_VK_O) | console_input_vk_pressed(CONSOLE_INPUT_VK_Z);
+    host_context->input_pressed[TETRIS_INPUT_ROTATE_RIGHT] = console_input_vk_pressed(CONSOLE_INPUT_VK_P) | console_input_vk_pressed(CONSOLE_INPUT_VK_X);
 }
 
 #define CONSOLE_SIM_DRAW_X_OFFSET (2)
@@ -102,6 +99,12 @@ static console_render* console_render_init() {
     memset(render->screen, 0, render->screen_width * render->screen_height);
 
     return render;
+}
+
+static void console_render_deinit(console_render* render) {
+    free(render->screen);
+    CloseHandle(render->console_handle);
+    free(render);
 }
 
 static void console_render_draw_matrix_border(console_render* render, const int matrix_width, const int matrix_height) {
@@ -150,12 +153,6 @@ static void console_render_draw_tetronimo(console_render* render, const tetris_s
 static void console_render_present(console_render* render) {
     DWORD bytesWritten;
     WriteConsoleOutputCharacter(render->console_handle, render->screen, render->screen_width * render->screen_height, (COORD){ 0, 0 }, &bytesWritten);
-}
-
-static void console_render_deinit(console_render* render) {
-    free(render->screen);
-    CloseHandle(render->console_handle);
-    free(render);
 }
 
 int main(int argc, const char** argv) {

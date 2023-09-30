@@ -28,15 +28,16 @@ void tetris_matrix_merge(tetris_matrix* matrix, const tetris_tetronimo* tetronim
     }
 }
 
-bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo) {
+bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo, const bool bounds_only) {
     // check for out of bounds
     if (tetronimo->x < 0 || tetronimo->x >= TETRIS_MATRIX_WIDTH || tetronimo->y + TETRIS_TETRONIMO_MAX_HEIGHT > TETRIS_MATRIX_HEIGHT) {
         return true;
     }
 
     // check for overlap
-    for (int row = 0; row < TETRIS_TETRONIMO_MAX_HEIGHT; ++row) {
-        if ((matrix->rows[row + tetronimo->y] & tetris_matrix_tetronimo_row_to_matrix_row(tetronimo, row)) != 0) {
+    for (int tetronimo_row = 0; tetronimo_row < TETRIS_TETRONIMO_MAX_HEIGHT; ++tetronimo_row) {
+        const tetris_matrix_row matrix_row = bounds_only ? k_tetris_matrix_row_init_state : matrix->rows[tetronimo_row + tetronimo->y];
+        if ((matrix_row & tetris_matrix_tetronimo_row_to_matrix_row(tetronimo, tetronimo_row)) != 0) {
             return true;
         }
     }
