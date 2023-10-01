@@ -59,10 +59,22 @@ int tetris_sim_get_tetronimo_max_height(const tetris_sim* sim);
 // this takes into account the tetronimo's current rotation
 bool tetris_sim_get_tetronimo_value(const tetris_sim* sim, int x, int y);
 
+// returns true if (in tetronimo-space) the x and y value is a cell on the next tetronimo
+bool tetris_sim_get_next_tetronimo_value(const tetris_sim* sim, int x, int y);
+
 // returns the x position of the tetronimo in the play space. the origin is in the top left
 int tetris_sim_get_tetronimo_pos_x(const tetris_sim* sim);
 
 // returns the y position of the tetronimo in the play space. the origin is in the top left
 int tetris_sim_get_tetronimo_pos_y(const tetris_sim* sim);
+
+// return the total score
+int tetris_sim_get_score(const tetris_sim* sim);
+
+// return the number of lines cleared
+int tetris_sim_get_lines(const tetris_sim* sim);
+
+// return the current level
+int tetris_sim_get_level(const tetris_sim* sim);
 
 #endif // TETRIS_SIM_H

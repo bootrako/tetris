@@ -22,7 +22,7 @@ void tetris_matrix_init(tetris_matrix* matrix);
 void tetris_matrix_merge(tetris_matrix* matrix, const tetris_tetronimo* tetronimo);
 
 // removes completed lines from the matrix
-void tetris_matrix_remove_completed_lines(tetris_matrix* matrix);
+int tetris_matrix_remove_completed_lines(tetris_matrix* matrix);
 
 // returns true if the tetronimo is overlapping a set bit on the matrix, or if the tetronimo is out of bounds.
 bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo, const bool bounds_only);

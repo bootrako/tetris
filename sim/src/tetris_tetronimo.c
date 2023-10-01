@@ -101,20 +101,21 @@ static void tetris_tetronimo_resolve_out_of_bounds(tetris_tetronimo* tetronimo, 
 }
 
 void tetris_tetronimo_init(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, tetris_tetronimo_spawner* spawner) {
-    *tetronimo = tetris_tetronimo_spawner_next(spawner);
+    *tetronimo = tetris_tetronimo_spawner_spawn(spawner);
     tetronimo->x = TETRIS_TETRONIMO_INIT_X;
     tetronimo->y = TETRIS_TETRONIMO_INIT_Y;
     tetronimo->is_grounded = tetris_tetronimo_resolve_collisions(tetronimo, matrix, 0, 1);
     tetronimo->is_active = true;
 }
 
-void tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_x, const int dir_y) {
+bool tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_x, const int dir_y) {
     tetronimo->x += dir_x;
     tetronimo->y += dir_y;
     const bool has_collisions = tetris_tetronimo_resolve_collisions(tetronimo, matrix, dir_x, dir_y);
     if (dir_y == 1) {
         tetronimo->is_grounded = has_collisions;
     }
+    return has_collisions;
 }
 
 void tetris_tetronimo_rotate(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_rot) {
@@ -127,10 +128,33 @@ bool tetris_tetronimo_get_value(const tetris_tetronimo* tetronimo, const int x, 
     return (tetronimo->rotations[tetronimo->current_rotation].rows[y] >> (TETRIS_TETRONIMO_MAX_WIDTH - 1 - x)) & 1;
 }
 
-void tetris_tetronimo_spawner_init(tetris_tetronimo_spawner* spawner, const uint64_t seed) {
-    tetris_rand_init(&spawner->rand, seed);
+static void tetris_tetronimo_spawner_gen_next(tetris_tetronimo_spawner* spawner) {
+    if (spawner->bag_remaining == 0) {
+        for (int i = 0; i < TETRIS_TETRONIMO_COUNT; ++i) {
+            spawner->bag[i] = &k_tetronimoes[i];
+        }
+        spawner->bag_remaining = TETRIS_TETRONIMO_COUNT;
+    }
+
+    const uint32_t rand_index = tetris_rand_range(&spawner->rand, 0, spawner->bag_remaining);
+    spawner->next = *spawner->bag[rand_index];
+
+    spawner->bag_remaining--;
+    spawner->bag[rand_index] = spawner->bag[spawner->bag_remaining]; 
 }
 
-tetris_tetronimo tetris_tetronimo_spawner_next(tetris_tetronimo_spawner* spawner) {
-    return k_tetronimoes[tetris_rand_range(&spawner->rand, 0, TETRIS_ARRAY_LEN(k_tetronimoes))];
+void tetris_tetronimo_spawner_init(tetris_tetronimo_spawner* spawner, const uint64_t seed) {
+    tetris_rand_init(&spawner->rand, seed);
+    spawner->bag_remaining = 0;
+    tetris_tetronimo_spawner_gen_next(spawner);
+}
+
+tetris_tetronimo tetris_tetronimo_spawner_spawn(tetris_tetronimo_spawner* spawner) {
+    tetris_tetronimo spawned = spawner->next;
+    tetris_tetronimo_spawner_gen_next(spawner);
+    return spawned;
+}
+
+const tetris_tetronimo* tetris_tetronimo_spawner_next(const tetris_tetronimo_spawner* spawner) {
+    return &spawner->next;
 }
