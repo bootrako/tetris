@@ -27,19 +27,6 @@ static void console_host_free(void* context, void* ptr) {
     free(ptr);
 }
 
-static float console_host_time(void* context) {
-    console_host_context* host_context = (console_host_context*)context;
-    LARGE_INTEGER counter_end;
-    QueryPerformanceCounter(&counter_end);
-    return (float)(counter_end.QuadPart - host_context->counter_start.QuadPart) / host_context->counter_frequency.QuadPart;
-}
-
-static uint64_t console_host_seed(void* context) {
-    FILETIME system_time;
-    GetSystemTimePreciseAsFileTime(&system_time);
-    return (ULARGE_INTEGER){ .LowPart = system_time.dwLowDateTime, .HighPart = system_time.dwHighDateTime }.QuadPart;
-}
-
 static bool console_host_input_pressed(void* context, tetris_input input) {
     console_host_context* host_context = (console_host_context*)context;
     return host_context->input_pressed[input];
@@ -47,8 +34,6 @@ static bool console_host_input_pressed(void* context, tetris_input input) {
 
 static console_host_context* console_host_context_init() {
     console_host_context* host_context = (console_host_context*)malloc(sizeof(console_host_context));
-    QueryPerformanceCounter(&host_context->counter_start);
-    QueryPerformanceFrequency(&host_context->counter_frequency);
     for (int i = 0; i < TETRIS_INPUT_COUNT; ++i) {
         host_context->input_pressed[i] = false;
     }
@@ -69,6 +54,12 @@ static void console_host_context_update(console_host_context* host_context) {
     host_context->input_pressed[TETRIS_INPUT_FAST_DROP] = console_input_vk_pressed(CONSOLE_INPUT_VK_S) | console_input_vk_pressed(CONSOLE_INPUT_VK_DOWN);
     host_context->input_pressed[TETRIS_INPUT_ROTATE_LEFT] = console_input_vk_pressed(CONSOLE_INPUT_VK_O) | console_input_vk_pressed(CONSOLE_INPUT_VK_Z);
     host_context->input_pressed[TETRIS_INPUT_ROTATE_RIGHT] = console_input_vk_pressed(CONSOLE_INPUT_VK_P) | console_input_vk_pressed(CONSOLE_INPUT_VK_X);
+}
+
+static uint64_t console_get_random_seed() {
+    FILETIME system_time;
+    GetSystemTimePreciseAsFileTime(&system_time);
+    return (ULARGE_INTEGER){ .LowPart = system_time.dwLowDateTime, .HighPart = system_time.dwHighDateTime }.QuadPart;
 }
 
 #define CONSOLE_SIM_DRAW_X_PADDING (4)
@@ -193,12 +184,10 @@ int main(int argc, const char** argv) {
     const tetris_sim_host sim_host = {
         .alloc = console_host_alloc,
         .free = console_host_free,
-        .time = console_host_time,
-        .seed = console_host_seed,
         .input_pressed = console_host_input_pressed,
         .context = host_context,
     };
-    tetris_sim* sim = tetris_sim_init(sim_host);
+    tetris_sim* sim = tetris_sim_init(sim_host, console_get_random_seed());
     console_render* render = console_render_init();
 
     const int matrix_width = tetris_sim_get_matrix_width(sim);
@@ -208,16 +197,34 @@ int main(int argc, const char** argv) {
 
     console_render_draw_matrix_border(render, matrix_width, matrix_height);
 
+    LARGE_INTEGER counter_frequency;
+    QueryPerformanceFrequency(&counter_frequency);
+
+    float frame_time_accumulator = 0.0f;
+
     while (!tetris_sim_is_game_over(sim)) {
-        Sleep(16);
+        LARGE_INTEGER counter_start;
+        QueryPerformanceCounter(&counter_start);
 
         console_host_context_update(host_context);
-        tetris_sim_update(sim);
+
+        const float time_per_frame = tetris_sim_time_per_frame(sim);
+        while (frame_time_accumulator > time_per_frame) {
+            tetris_sim_update(sim);
+            frame_time_accumulator -= time_per_frame;
+        }
 
         console_render_draw_matrix(render, sim, matrix_width, matrix_height);
         console_render_draw_tetronimo(render, sim, tetronimo_max_width, tetronimo_max_height);
         console_render_draw_ui(render, sim, matrix_width, tetronimo_max_width, tetronimo_max_height);
         console_render_present(render);
+
+        Sleep(16);
+
+        LARGE_INTEGER counter_end;
+        QueryPerformanceCounter(&counter_end);
+
+        frame_time_accumulator += (float)(counter_end.QuadPart - counter_start.QuadPart) / (float)(counter_frequency.QuadPart);
     }
 
     console_render_deinit(render);
