@@ -28,11 +28,15 @@ void tetris_matrix_merge(tetris_matrix* matrix, const tetris_tetronimo* tetronim
     }
 }
 
-void tetris_matrix_remove_completed_lines(tetris_matrix* matrix) {
+int tetris_matrix_remove_completed_lines(tetris_matrix* matrix) {
+    int num_completed_lines = 0;
+
     const tetris_matrix_row* read = &matrix->rows[TETRIS_MATRIX_HEIGHT - 1];
     tetris_matrix_row* write = &matrix->rows[TETRIS_MATRIX_HEIGHT - 1];
     while (read != &matrix->rows[0]) {
-        if (*read != TETRIS_MATRIX_ROW_ALL_BITS_SET) {
+        if (*read == TETRIS_MATRIX_ROW_ALL_BITS_SET) {
+            num_completed_lines++;
+        } else {
             *write = *read;
             write--;
         }
@@ -42,6 +46,8 @@ void tetris_matrix_remove_completed_lines(tetris_matrix* matrix) {
         *write = TETRIS_MATRIX_ROW_INIT;
         write--;
     }
+
+    return num_completed_lines;
 }
 
 bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo, const bool bounds_only) {

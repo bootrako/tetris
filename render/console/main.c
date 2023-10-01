@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <windows.h>
 #include <tetris_sim.h>
 
@@ -70,8 +71,8 @@ static void console_host_context_update(console_host_context* host_context) {
     host_context->input_pressed[TETRIS_INPUT_ROTATE_RIGHT] = console_input_vk_pressed(CONSOLE_INPUT_VK_P) | console_input_vk_pressed(CONSOLE_INPUT_VK_X);
 }
 
-#define CONSOLE_SIM_DRAW_X_OFFSET (2)
-#define CONSOLE_SIM_DRAW_Y_OFFSET (2)
+#define CONSOLE_SIM_DRAW_X_PADDING (4)
+#define CONSOLE_SIM_DRAW_Y_PADDING (3)
 #define CONSOLE_MATRIX_BORDER_CHAR ('.')
 #define CONSOLE_MATRIX_SET_CHAR ('x')
 #define CONSOLE_TETRONIMO_SET_CHAR ('x')
@@ -109,17 +110,17 @@ static void console_render_deinit(console_render* render) {
 
 static void console_render_draw_matrix_border(console_render* render, const int matrix_width, const int matrix_height) {
     // top and bottom border
-    for (int x = 0; x < matrix_width + CONSOLE_SIM_DRAW_X_OFFSET * 2; ++x) {
-        for (int y = 0; y < CONSOLE_SIM_DRAW_Y_OFFSET; ++y) {
+    for (int x = 0; x < matrix_width + CONSOLE_SIM_DRAW_X_PADDING * 2; ++x) {
+        for (int y = 0; y < CONSOLE_SIM_DRAW_Y_PADDING; ++y) {
             render->screen[y * render->screen_width + x] = CONSOLE_MATRIX_BORDER_CHAR;
-            render->screen[(matrix_height + CONSOLE_SIM_DRAW_Y_OFFSET + y) * render->screen_width + x] = CONSOLE_MATRIX_BORDER_CHAR;
+            render->screen[(matrix_height + CONSOLE_SIM_DRAW_Y_PADDING + y) * render->screen_width + x] = CONSOLE_MATRIX_BORDER_CHAR;
         }
     }
     // left and right border
-    for (int y = 0; y < matrix_height + CONSOLE_SIM_DRAW_Y_OFFSET * 2; ++y) {
-        for (int x = 0; x < CONSOLE_SIM_DRAW_X_OFFSET; ++x) {
+    for (int y = 0; y < matrix_height + CONSOLE_SIM_DRAW_Y_PADDING * 2; ++y) {
+        for (int x = 0; x < CONSOLE_SIM_DRAW_X_PADDING; ++x) {
             render->screen[y * render->screen_width + x] = CONSOLE_MATRIX_BORDER_CHAR;
-            render->screen[y * render->screen_width + matrix_width + CONSOLE_SIM_DRAW_X_OFFSET + x] = CONSOLE_MATRIX_BORDER_CHAR;
+            render->screen[y * render->screen_width + matrix_width + CONSOLE_SIM_DRAW_X_PADDING + x] = CONSOLE_MATRIX_BORDER_CHAR;
         }
     }
 }
@@ -127,12 +128,12 @@ static void console_render_draw_matrix_border(console_render* render, const int 
 static void console_render_draw_matrix(console_render* render, const tetris_sim* sim, const int matrix_width, const int matrix_height) {
     for (int y = 0; y < matrix_height; ++y) {
         // clear the existing line
-        memset(render->screen + ((y + CONSOLE_SIM_DRAW_Y_OFFSET) * render->screen_width + CONSOLE_SIM_DRAW_X_OFFSET), 0, matrix_width);
+        memset(render->screen + ((y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + CONSOLE_SIM_DRAW_X_PADDING), 0, matrix_width);
 
         // draw the updated line
         for (int x = 0; x < matrix_width; ++x) {
             if (tetris_sim_get_matrix_value(sim, x, y)) {
-                render->screen[(y + CONSOLE_SIM_DRAW_Y_OFFSET) * render->screen_width + x + CONSOLE_SIM_DRAW_X_OFFSET] = CONSOLE_MATRIX_SET_CHAR;
+                render->screen[(y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + x + CONSOLE_SIM_DRAW_X_PADDING] = CONSOLE_MATRIX_SET_CHAR;
             }
         }
     }
@@ -142,13 +143,42 @@ static void console_render_draw_tetronimo(console_render* render, const tetris_s
     if (!tetris_sim_is_tetronimo_active(sim)) {
         return;
     }
-    const int tetronimo_x = tetris_sim_get_tetronimo_pos_x(sim);
-    const int tetronimo_y = tetris_sim_get_tetronimo_pos_y(sim); 
-    for (int y = 0; y < tetronimo_max_height; ++y) {
-        for (int x = 0; x < tetronimo_max_width; ++x) {
-            if (tetris_sim_get_tetronimo_value(sim, x, y)) {
-                render->screen[(tetronimo_y + y + CONSOLE_SIM_DRAW_Y_OFFSET) * render->screen_width + (tetronimo_x + x + CONSOLE_SIM_DRAW_X_OFFSET)] = CONSOLE_TETRONIMO_SET_CHAR;
+    const int pos_x = tetris_sim_get_tetronimo_pos_x(sim);
+    const int pos_y = tetris_sim_get_tetronimo_pos_y(sim); 
+    for (int tetronimo_y = 0; tetronimo_y < tetronimo_max_height; ++tetronimo_y) {
+        for (int tetronimo_x = 0; tetronimo_x < tetronimo_max_width; ++tetronimo_x) {
+            if (tetris_sim_get_tetronimo_value(sim, tetronimo_x, tetronimo_y)) {
+                render->screen[(pos_y + tetronimo_y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + (pos_x + tetronimo_x + CONSOLE_SIM_DRAW_X_PADDING)] = CONSOLE_TETRONIMO_SET_CHAR;
             }
+        }
+    }
+}
+
+static void console_render_draw_ui(console_render* render, const tetris_sim* sim, const int matrix_width, const int tetronimo_max_width, const int tetronimo_max_height) {
+    // draw text scores
+    int draw_x = (matrix_width + CONSOLE_SIM_DRAW_X_PADDING * 2) + 3;
+    int draw_y = 1;
+    sprintf(render->screen + (draw_y * render->screen_width + draw_x), "SCORE");
+    draw_y = 2;
+    sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%d", tetris_sim_get_score(sim));
+
+    draw_y = 4;
+    sprintf(render->screen + (draw_y * render->screen_width + draw_x), "LINES");
+    draw_y = 5;
+    sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%d", tetris_sim_get_lines(sim));
+
+    draw_y = 7;
+    sprintf(render->screen + (draw_y * render->screen_width + draw_x), "LEVEL");
+    draw_y = 8;
+    sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%d", tetris_sim_get_level(sim));
+
+    // draw next tetronimo
+    draw_y = 10;
+    sprintf(render->screen + (draw_y * render->screen_width + draw_x), "NEXT");
+    draw_y = 11;
+    for (int tetronimo_y = 0; tetronimo_y < tetronimo_max_height; ++tetronimo_y) {
+        for (int tetronimo_x = 0; tetronimo_x < tetronimo_max_width; ++tetronimo_x) {
+            render->screen[(draw_y + tetronimo_y) * render->screen_width + (draw_x + tetronimo_x)] = tetris_sim_get_next_tetronimo_value(sim, tetronimo_x, tetronimo_y) ? CONSOLE_TETRONIMO_SET_CHAR : ' ';
         }
     }
 }
@@ -186,6 +216,7 @@ int main(int argc, const char** argv) {
 
         console_render_draw_matrix(render, sim, matrix_width, matrix_height);
         console_render_draw_tetronimo(render, sim, tetronimo_max_width, tetronimo_max_height);
+        console_render_draw_ui(render, sim, matrix_width, tetronimo_max_width, tetronimo_max_height);
         console_render_present(render);
     }
 
