@@ -3,8 +3,8 @@
 #include "tetris_tetronimo.h"
 #include "tetris_utils.h"
 
-#define TETRIS_FAST_DROP_TIMER (0.05f)
-#define TETRIS_RESET_TIMER (0.2f)
+#define TETRIS_FAST_DROP_TIMER (3)
+#define TETRIS_RESET_TIMER (12)
 
 struct tetris_sim {
     tetris_sim_host host;                       // the host interface
@@ -18,9 +18,8 @@ struct tetris_sim {
     int lines;                                  // total number of lines cleared
     int level;                                  // current level of the player
     int fast_drop_count;                        // number of cells fast dropped for the current tetronimo
-    float time;                                 // the current timestamp
-    float drop_timer;                           // timer counting down till the next drop
-    float reset_timer;                          // timer counting down till the next tetronimo reset
+    int drop_timer;                             // timer counting down till the next drop
+    int reset_timer;                            // timer counting down till the next tetronimo reset
     bool fast_drop;                             // true when player is dropping quickly by pressing the fast drop input
     bool game_over;                             // true when the player has lost
 };
@@ -42,10 +41,10 @@ static bool tetris_sim_input_just_released(tetris_sim* sim, tetris_input input) 
     return !sim->input_pressed_cur[input] && sim->input_pressed_prv[input];
 }
 
-static float tetris_sim_calc_drop_timer(const tetris_sim* sim) {
+static int tetris_sim_calc_drop_timer(const tetris_sim* sim) {
     const int drop_frames_per_level[] = { 48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1 };
     const int level_index = sim->level >= TETRIS_ARRAY_LEN(drop_frames_per_level) ? TETRIS_ARRAY_LEN(drop_frames_per_level) - 1 : sim->level;
-    return (float)drop_frames_per_level[level_index] / 60.0f;
+    return drop_frames_per_level[level_index];
 }
 
 static int tetris_sim_calc_score(const tetris_sim* sim, const int completed_lines) {
@@ -53,11 +52,11 @@ static int tetris_sim_calc_score(const tetris_sim* sim, const int completed_line
     return (sim->fast_drop_count / 2) + (completed_lines_base_score[completed_lines] * (sim->level + 1));
 }
 
-tetris_sim* tetris_sim_init(tetris_sim_host host) {
+tetris_sim* tetris_sim_init(tetris_sim_host host, const uint64_t random_seed) {
     tetris_sim* sim = (tetris_sim*)host.alloc(host.context, sizeof(tetris_sim));
     sim->host = host;
     tetris_matrix_init(&sim->matrix);
-    tetris_tetronimo_spawner_init(&sim->spawner, sim->host.seed(sim->host.context));
+    tetris_tetronimo_spawner_init(&sim->spawner, random_seed);
     tetris_tetronimo_init(&sim->tetronimo, &sim->matrix, &sim->spawner);
     for (int input = 0; input < TETRIS_INPUT_COUNT * 2; ++input) {
         sim->input_buffer[input] = false;
@@ -68,7 +67,6 @@ tetris_sim* tetris_sim_init(tetris_sim_host host) {
     sim->lines = 0;
     sim->level = 0;
     sim->fast_drop_count = 0;
-    sim->time = sim->host.time(sim->host.context);
     sim->drop_timer = tetris_sim_calc_drop_timer(sim);
     sim->reset_timer = TETRIS_RESET_TIMER;
     sim->fast_drop = false;
@@ -87,13 +85,9 @@ void tetris_sim_update(tetris_sim* sim) {
 
     tetris_sim_poll_input(sim);
 
-    const float last_time = sim->time;
-    sim->time = sim->host.time(sim->host.context);
-    const float delta_time = sim->time - last_time;
-
     if (tetris_sim_input_just_pressed(sim, TETRIS_INPUT_FAST_DROP)) {
         sim->fast_drop = true;
-        sim->drop_timer = 0.0f;
+        sim->drop_timer = 0;
     }
 
     if (tetris_sim_input_just_released(sim, TETRIS_INPUT_FAST_DROP)) {
@@ -118,8 +112,8 @@ void tetris_sim_update(tetris_sim* sim) {
             tetris_tetronimo_rotate(&sim->tetronimo, &sim->matrix, 1);
         }
         
-        sim->drop_timer -= delta_time;
-        if (sim->drop_timer <= 0.0f) {
+        sim->drop_timer--;
+        if (sim->drop_timer <= 0) {
             const bool has_collision = tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, 0, 1);
             if (!has_collision && sim->fast_drop) {
                 sim->fast_drop_count++;
@@ -133,7 +127,7 @@ void tetris_sim_update(tetris_sim* sim) {
             sim->reset_timer = TETRIS_RESET_TIMER;
         } 
     } else {
-        sim->reset_timer -= delta_time;
+        sim->reset_timer--;
         if (sim->reset_timer <= 0.0f) {
             const int completed_lines = tetris_matrix_remove_completed_lines(&sim->matrix);
             sim->score += tetris_sim_calc_score(sim, completed_lines);
@@ -148,6 +142,10 @@ void tetris_sim_update(tetris_sim* sim) {
             }
         }
     }
+}
+
+float tetris_sim_time_per_frame(const tetris_sim* sim) {
+    return 0.01666f;
 }
 
 bool tetris_sim_is_game_over(const tetris_sim* sim) {

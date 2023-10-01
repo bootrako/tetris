@@ -17,8 +17,6 @@ typedef enum tetris_input_t {
 typedef struct {
     void*(*alloc)(void* context, size_t size);                  // allocate memory with the given size
     void(*free)(void* context, void* ptr);                      // free allocated memory
-    float(*time)(void* context);                                // get a high resolution, monotonically-increasing timestamp
-    uint64_t(*seed)(void* context);                             // get a value that can be used as a seed in a random number generator
     bool(*input_pressed)(void* context, tetris_input input);    // returns true if an input is currently pressed
     void* context;                                              // context object for storing host data
 } tetris_sim_host;
@@ -26,13 +24,16 @@ typedef struct {
 typedef struct tetris_sim tetris_sim;
 
 // initializes the simulation. internally allocates memory that can only be freed by calling deinit
-tetris_sim* tetris_sim_init(tetris_sim_host host);
+tetris_sim* tetris_sim_init(tetris_sim_host host, const uint64_t random_seed);
 
 // deinitialize the simulation. must be called on a sim pointer that was created with init
 void tetris_sim_deinit(tetris_sim* sim);
 
 // updates the simulation
 void tetris_sim_update(tetris_sim* sim);
+
+// gets the amount of time in seconds for each frame
+float tetris_sim_time_per_frame(const tetris_sim* sim);
 
 // returns true when the simulation is finished and the player has lost
 bool tetris_sim_is_game_over(const tetris_sim* sim);
