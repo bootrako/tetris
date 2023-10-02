@@ -3,71 +3,71 @@
 #include "tetris_utils.h"
 
 // . . . .  0000
+// . x x .  0110
+// . x x .  0110
 // . . . .  0000
-// x x . .  1100
-// x x . .  1100
 const tetris_tetronimo_rotation k_tetronimo_o[] = { 
-    { .rows = { 0x0, 0x0, 0xC, 0xC } }
+    { .rows = { 0x0, 0x6, 0x6, 0x0 } }
 };
 
-// x . . . 1000 // . . . . 0000
-// x . . . 1000 // . . . . 0000
-// x . . . 1000 // . . . . 0000
-// x . . . 1000 // x x x x 1111
+// . . . . 0000 // . . x . 0010
+// x x x x 1111 // . . x . 0010
+// . . . . 0000 // . . x . 0010
+// . . . . 0000 // . . x . 0010
 const tetris_tetronimo_rotation k_tetronimo_i[] = { 
-    { .rows = { 0x8, 0x8, 0x8, 0x8 } },
-    { .rows = { 0x0, 0x0, 0x0, 0xF } }
+    { .rows = { 0x0, 0xF, 0x0, 0x0 } },
+    { .rows = { 0x2, 0x2, 0x2, 0x2 } }
 };
 
-// . . . . 0000 // . . . . 0000
-// . . . . 0000 // x . . . 1000
-// . x x . 0110 // x x . . 1100
-// x x . . 1100 // . x . . 0100
-const tetris_tetronimo_rotation k_tetronimo_s[] = {
-    { .rows = { 0x0, 0x0, 0x6, 0xC } },
-    { .rows = { 0x0, 0x8, 0xC, 0x4 } }
-};
-
-// . . . . 0000 // . . . . 0000
 // . . . . 0000 // . x . . 0100
-// x x . . 1100 // x x . . 1100
-// . x x . 0110 // x . . . 1000
+// . x x . 0110 // . x x . 0110
+// x x . . 1100 // . . x . 0010
+// . . . . 0000 // . . . . 0000
+const tetris_tetronimo_rotation k_tetronimo_s[] = {
+    { .rows = { 0x0, 0x6, 0xC, 0x0 } },
+    { .rows = { 0x4, 0x6, 0x2, 0x0 } }
+};
+
+// . . . . 0000 // . . x . 0010
+// x x . . 1100 // . x x . 0110
+// . x x . 0110 // . x . . 0100
+// . . . . 0000 // . . . . 0000
 const tetris_tetronimo_rotation k_tetronimo_z[] = {
-    { .rows = { 0x0, 0x0, 0xC, 0x6 } },
-    { .rows = { 0x0, 0x4, 0xC, 0x8 } }
+    { .rows = { 0x0, 0xC, 0x6, 0x0 } },
+    { .rows = { 0x2, 0x6, 0x4, 0x0 } }
 };
 
-// . . . . 0000 // . . . . 0000 // . . . . 0000 // . . . . 0000 
-// . . . . 0000 // . x . . 0100 // . . . . 0000 // x . . . 1000
-// x x x . 1110 // x x . . 1100 // . x . . 0100 // x x . . 1100
-// . x . . 0100 // . x . . 0100 // x x x . 1110 // x . . . 1000
+// . . . . 0000 // . x . . 0100 // . x . . 0100 // . x . . 0100 
+// x x x . 1110 // x x . . 1100 // x x x . 1110 // . x x . 0110
+// . x . . 0100 // . x . . 0100 // . . . . 0000 // . x . . 0100
+// . . . . 0000 // . . . . 0000 // . . . . 0000 // . . . . 0000
 const tetris_tetronimo_rotation k_tetronimo_t[] = {
-    { .rows = { 0x0, 0x0, 0xE, 0x4 } },
-    { .rows = { 0x0, 0x4, 0xC, 0x4 } },
-    { .rows = { 0x0, 0x0, 0x4, 0xE } },
-    { .rows = { 0x0, 0x8, 0xC, 0x8 } }
+    { .rows = { 0x0, 0xE, 0x4, 0x0 } },
+    { .rows = { 0x4, 0xC, 0x4, 0x0 } },
+    { .rows = { 0x4, 0xE, 0x0, 0x0 } },
+    { .rows = { 0x4, 0x6, 0x4, 0x0 } }
 };
 
-// . x . . 0100 // . . . . 0000 // x x . . 1100 // . . . . 0000
-// . x . . 0100 // . . . . 0000 // x . . . 1000 // . . . . 0000
-// . x . . 0100 // x . . . 1000 // x . . . 1000 // x x x x 1111
-// x x . . 1100 // x x x x 1111 // x . . . 1000 // . . . x 0001
+// . . . . 0000 // . x . . 0100 // x . . . 1000 // . x x . 0110
+// x x x . 1110 // . x . . 0100 // x x x . 1110 // . x . . 0100
+// . . x . 0010 // x x . . 1100 // . . . . 0000 // . x . . 0100
+// . . . . 0000 // . . . . 0000 // . . . . 0000 // . . . . 0000
 const tetris_tetronimo_rotation k_tetronimo_j[] = {
-    { .rows = { 0x4, 0x4, 0x4, 0xC } },
-    { .rows = { 0x0, 0x0, 0x8, 0xF } },
-    { .rows = { 0xC, 0x8, 0x8, 0x8 } },
-    { .rows = { 0x0, 0x0, 0xF, 0x1 } }
+    { .rows = { 0x0, 0xE, 0x2, 0x0 } },
+    { .rows = { 0x4, 0x4, 0xC, 0x0 } },
+    { .rows = { 0x8, 0xE, 0x0, 0x0 } },
+    { .rows = { 0x6, 0x4, 0x4, 0x0 } }
 };
 
-// x . . . 1000 // . . . . 0000 // x x . . 1100 // . . . . 0000 
-// x . . . 1000 // . . . . 0000 // . x . . 0100 // . . . . 0000
-// x . . . 1000 // x x x x 1111 // . x . . 0100 // . . . x 0001
-// x x . . 1100 // x . . . 1000 // . x . . 0100 // x x x x 1111
+// . . . . 0000 // x x . . 1100 // . . x . 0010 // . x . . 0100 
+// x x x . 1110 // . x . . 0100 // x x x . 1110 // . x . . 0100
+// x . . . 1000 // . x . . 0100 // . . . . 0000 // . x x . 0110
+// . . . . 0000 // . . . . 0000 // . . . . 0000 // . . . . 0000
 const tetris_tetronimo_rotation k_tetronimo_l[] = {
-    { .rows = { 0x8, 0x8, 0x8, 0xC } },
-    { .rows = { 0x0, 0x0, 0xF, 0x8 } },
-    { .rows = { 0xC, 0x4, 0x4, 0x4 } },
-    { .rows = { 0x0, 0x0, 0x1, 0xF } }
+    { .rows = { 0x0, 0xE, 0x8, 0x0 } },
+    { .rows = { 0xC, 0x4, 0x4, 0x0 } },
+    { .rows = { 0x2, 0xE, 0x0, 0x0 } },
+    { .rows = { 0x4, 0x4, 0x6, 0x0 } }
 };
 
 const tetris_tetronimo k_tetronimoes[] = {
@@ -81,7 +81,7 @@ const tetris_tetronimo k_tetronimoes[] = {
 };
 
 #define TETRIS_TETRONIMO_INIT_X (4)
-#define TETRIS_TETRONIMO_INIT_Y (0)
+#define TETRIS_TETRONIMO_INIT_Y (-1)
 
 static bool tetris_tetronimo_resolve_collisions(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, int dir_x, int dir_y) {
     bool has_collisions = false;
@@ -94,6 +94,7 @@ static bool tetris_tetronimo_resolve_collisions(tetris_tetronimo* tetronimo, con
 }
 
 static void tetris_tetronimo_resolve_out_of_bounds(tetris_tetronimo* tetronimo, const tetris_matrix* matrix) {
+    // get the direction away from the nearest wall
     const int dir = (tetronimo->x < TETRIS_MATRIX_WIDTH - tetronimo->x) ? 1 : -1;
     while (tetris_matrix_collide(matrix, tetronimo, true)) {
         tetronimo->x += dir;
@@ -124,6 +125,10 @@ void tetris_tetronimo_rotate(tetris_tetronimo* tetronimo, const tetris_matrix* m
     tetronimo->is_grounded = tetris_tetronimo_resolve_collisions(tetronimo, matrix, 0, 1);
 }
 
+tetris_tetronimo_row tetris_tetronimo_get_row(const tetris_tetronimo* tetronimo, const int row) {
+    return tetronimo->rotations[tetronimo->current_rotation].rows[row];
+}
+
 bool tetris_tetronimo_get_value(const tetris_tetronimo* tetronimo, const int x, const int y) {
     return (tetronimo->rotations[tetronimo->current_rotation].rows[y] >> (TETRIS_TETRONIMO_MAX_WIDTH - 1 - x)) & 1;
 }
@@ -137,7 +142,7 @@ static void tetris_tetronimo_spawner_gen_next(tetris_tetronimo_spawner* spawner)
     }
 
     const uint32_t rand_index = tetris_rand_range(&spawner->rand, 0, spawner->bag_remaining);
-    spawner->next = *spawner->bag[rand_index];
+    spawner->next = spawner->bag[rand_index];
 
     spawner->bag_remaining--;
     spawner->bag[rand_index] = spawner->bag[spawner->bag_remaining]; 
@@ -150,11 +155,7 @@ void tetris_tetronimo_spawner_init(tetris_tetronimo_spawner* spawner, const uint
 }
 
 tetris_tetronimo tetris_tetronimo_spawner_spawn(tetris_tetronimo_spawner* spawner) {
-    tetris_tetronimo spawned = spawner->next;
+    tetris_tetronimo spawned = *spawner->next;
     tetris_tetronimo_spawner_gen_next(spawner);
     return spawned;
-}
-
-const tetris_tetronimo* tetris_tetronimo_spawner_next(const tetris_tetronimo_spawner* spawner) {
-    return &spawner->next;
 }
