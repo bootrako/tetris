@@ -145,7 +145,7 @@ void tetris_sim_update(tetris_sim* sim) {
 }
 
 float tetris_sim_time_per_frame(const tetris_sim* sim) {
-    return 0.01666f;
+    return 1.0f / 60.0f;
 }
 
 bool tetris_sim_is_game_over(const tetris_sim* sim) {
@@ -181,7 +181,7 @@ bool tetris_sim_get_tetronimo_value(const tetris_sim* sim, int x, int y) {
 }
 
 bool tetris_sim_get_next_tetronimo_value(const tetris_sim* sim, int x, int y) {
-    return tetris_tetronimo_get_value(&sim->spawner.next, x, y);
+    return tetris_tetronimo_get_value(sim->spawner.next, x, y);
 }
 
 int tetris_sim_get_tetronimo_pos_x(const tetris_sim* sim) {

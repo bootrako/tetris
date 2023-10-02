@@ -28,7 +28,7 @@ typedef struct tetris_tetronimo_t {
 
 typedef struct {
     tetris_rand rand;                               // random number generator
-    tetris_tetronimo next;
+    const tetris_tetronimo* next;
     const tetris_tetronimo* bag[TETRIS_TETRONIMO_COUNT];
     int bag_remaining;
 } tetris_tetronimo_spawner;
@@ -42,6 +42,9 @@ bool tetris_tetronimo_move(tetris_tetronimo* tetronimo, const tetris_matrix* mat
 // rotates the tetronimo, then tries to find an available space if there is a collision
 void tetris_tetronimo_rotate(tetris_tetronimo* tetronimo, const tetris_matrix* matrix, const int dir_rot);
 
+// returns the bits of a given tetronimo row
+tetris_tetronimo_row tetris_tetronimo_get_row(const tetris_tetronimo* tetronimo, const int row);
+
 // given an x and y in tetronimo coordinates, returns true if the bit is set in the tetronimo, based on its current rotation
 bool tetris_tetronimo_get_value(const tetris_tetronimo* tetronimo, const int x, const int y);
 
@@ -50,9 +53,5 @@ void tetris_tetronimo_spawner_init(tetris_tetronimo_spawner* spawner, const uint
 
 // spawn the next tetronimo
 tetris_tetronimo tetris_tetronimo_spawner_spawn(tetris_tetronimo_spawner* spawner);
-
-// peek at the next tetronimo
-const tetris_tetronimo* tetris_tetronimo_spawner_next(const tetris_tetronimo_spawner* spawner);
-
 
 #endif // TETRIS_TETRONIMO_H

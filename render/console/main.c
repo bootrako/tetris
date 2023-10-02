@@ -137,6 +137,9 @@ static void console_render_draw_tetronimo(console_render* render, const tetris_s
     const int pos_x = tetris_sim_get_tetronimo_pos_x(sim);
     const int pos_y = tetris_sim_get_tetronimo_pos_y(sim); 
     for (int tetronimo_y = 0; tetronimo_y < tetronimo_max_height; ++tetronimo_y) {
+        if (pos_y + tetronimo_y < 0) {
+            continue;
+        }
         for (int tetronimo_x = 0; tetronimo_x < tetronimo_max_width; ++tetronimo_x) {
             if (tetris_sim_get_tetronimo_value(sim, tetronimo_x, tetronimo_y)) {
                 render->screen[(pos_y + tetronimo_y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + (pos_x + tetronimo_x + CONSOLE_SIM_DRAW_X_PADDING)] = CONSOLE_TETRONIMO_SET_CHAR;
@@ -219,7 +222,7 @@ int main(int argc, const char** argv) {
         console_render_draw_ui(render, sim, matrix_width, tetronimo_max_width, tetronimo_max_height);
         console_render_present(render);
 
-        Sleep(16);
+        Sleep((DWORD)(time_per_frame * 1000.0f));
 
         LARGE_INTEGER counter_end;
         QueryPerformanceCounter(&counter_end);
