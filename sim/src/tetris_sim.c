@@ -5,6 +5,8 @@
 
 #define TETRIS_FAST_DROP_TIMER (3)
 #define TETRIS_RESET_TIMER (12)
+#define TETRIS_HORIZONTAL_HOLD_DELAY (16)
+#define TETRIS_HORIZONTAL_HOLD_TIMER (6)
 
 struct tetris_sim {
     tetris_sim_host host;                       // the host interface
@@ -20,6 +22,9 @@ struct tetris_sim {
     int fast_drop_count;                        // number of cells fast dropped for the current tetronimo
     int drop_timer;                             // timer counting down till the next drop
     int reset_timer;                            // timer counting down till the next tetronimo reset
+    int horizontal_timer;                       // timer related to holding left or right
+    int horizontal_dir;                         // the direction of left or right holding
+    bool horizontal_hold;                       // true when player is holding left or right
     bool fast_drop;                             // true when player is dropping quickly by pressing the fast drop input
     bool game_over;                             // true when the player has lost
 };
@@ -49,7 +54,7 @@ static int tetris_sim_calc_drop_timer(const tetris_sim* sim) {
 
 static int tetris_sim_calc_score(const tetris_sim* sim, const int completed_lines) {
     const int completed_lines_base_score[] = { 0, 40, 100, 300, 1200 };
-    return (sim->fast_drop_count / 2) + (completed_lines_base_score[completed_lines] * (sim->level + 1));
+    return (sim->fast_drop_count) + (completed_lines_base_score[completed_lines] * (sim->level + 1));
 }
 
 tetris_sim* tetris_sim_init(tetris_sim_host host, const uint64_t random_seed) {
@@ -69,6 +74,8 @@ tetris_sim* tetris_sim_init(tetris_sim_host host, const uint64_t random_seed) {
     sim->fast_drop_count = 0;
     sim->drop_timer = tetris_sim_calc_drop_timer(sim);
     sim->reset_timer = TETRIS_RESET_TIMER;
+    sim->horizontal_timer = 0;
+    sim->horizontal_hold = false;
     sim->fast_drop = false;
     sim->game_over = false;
     return sim;
@@ -87,21 +94,44 @@ void tetris_sim_update(tetris_sim* sim) {
 
     if (tetris_sim_input_just_pressed(sim, TETRIS_INPUT_FAST_DROP)) {
         sim->fast_drop = true;
-        sim->drop_timer = 0;
+        sim->drop_timer = TETRIS_FAST_DROP_TIMER;
     }
 
     if (tetris_sim_input_just_released(sim, TETRIS_INPUT_FAST_DROP)) {
         sim->fast_drop = false;
+        sim->fast_drop_count = 0;
         sim->drop_timer = tetris_sim_calc_drop_timer(sim);
     }
 
     if (sim->tetronimo.is_active) {
-        if (tetris_sim_input_just_pressed(sim, TETRIS_INPUT_MOVE_LEFT)) {
+        if (!sim->fast_drop && tetris_sim_input_just_pressed(sim, TETRIS_INPUT_MOVE_LEFT)) {
             tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, -1, 0);
+            sim->horizontal_hold = true;
+            sim->horizontal_timer = TETRIS_HORIZONTAL_HOLD_DELAY;
+            sim->horizontal_dir = -1;
         }
 
-        if (tetris_sim_input_just_pressed(sim, TETRIS_INPUT_MOVE_RIGHT)) {
+        if (tetris_sim_input_just_released(sim, TETRIS_INPUT_MOVE_LEFT)) {
+            sim->horizontal_hold = false;
+        }
+
+        if (!sim->fast_drop && tetris_sim_input_just_pressed(sim, TETRIS_INPUT_MOVE_RIGHT)) {
             tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, 1, 0);
+            sim->horizontal_hold = true;
+            sim->horizontal_timer = TETRIS_HORIZONTAL_HOLD_DELAY;
+            sim->horizontal_dir = 1;
+        }
+
+        if (tetris_sim_input_just_released(sim, TETRIS_INPUT_MOVE_RIGHT)) {
+            sim->horizontal_hold = false;
+        }
+
+        if (sim->horizontal_hold) {
+            sim->horizontal_timer--;
+            if (sim->horizontal_timer <= 0) {
+                tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, sim->horizontal_dir, 0);
+                sim->horizontal_timer = TETRIS_HORIZONTAL_HOLD_TIMER;
+            }
         }
 
         if (tetris_sim_input_just_pressed(sim, TETRIS_INPUT_ROTATE_LEFT)) {
@@ -121,7 +151,7 @@ void tetris_sim_update(tetris_sim* sim) {
             sim->drop_timer += sim->fast_drop ? TETRIS_FAST_DROP_TIMER : tetris_sim_calc_drop_timer(sim);
         }
 
-        if (sim->tetronimo.is_grounded) {
+        if (sim->tetronimo.is_locked) {
             tetris_matrix_merge(&sim->matrix, &sim->tetronimo);
             sim->tetronimo.is_active = false;
             sim->reset_timer = TETRIS_RESET_TIMER;
@@ -133,10 +163,13 @@ void tetris_sim_update(tetris_sim* sim) {
             sim->score += tetris_sim_calc_score(sim, completed_lines);
             sim->lines += completed_lines;
             sim->level = sim->lines / 10;
+            sim->horizontal_hold = false;
             sim->fast_drop_count = 0;
+            sim->fast_drop = false;
+            sim->drop_timer = tetris_sim_calc_drop_timer(sim);
 
             tetris_tetronimo_init(&sim->tetronimo, &sim->matrix, &sim->spawner);
-            if (sim->tetronimo.is_grounded) {
+            if (sim->tetronimo.is_locked) {
                 sim->game_over = true;
                 return;
             }
@@ -202,4 +235,16 @@ int tetris_sim_get_lines(const tetris_sim* sim) {
 
 int tetris_sim_get_level(const tetris_sim* sim) {
     return sim->level;
+}
+
+int tetris_sim_get_statistic_count(const tetris_sim* sim) {
+    return TETRIS_TETRONIMO_SHAPE_COUNT;
+}
+
+const char* tetris_sim_get_statistic_name(const tetris_sim* sim, int index) {
+    return k_tetris_tetronimo_shape_names[index];
+}
+
+int tetris_sim_get_statistic_value(const tetris_sim* sim, int index) {
+    return sim->spawner.num_spawned[index];
 }

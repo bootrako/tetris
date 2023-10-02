@@ -9,8 +9,20 @@ typedef struct tetris_matrix_t tetris_matrix;
 // config
 #define TETRIS_TETRONIMO_MAX_WIDTH (4)
 #define TETRIS_TETRONIMO_MAX_HEIGHT (4)
-#define TETRIS_TETRONIMO_COUNT (7)
 typedef uint8_t tetris_tetronimo_row;           // needs to have enough bits to hold tetronimo max width
+
+typedef enum tetris_tetronimo_shape_t {
+    TETRIS_TETRONIMO_SHAPE_T,
+    TETRIS_TETRONIMO_SHAPE_J,
+    TETRIS_TETRONIMO_SHAPE_Z,
+    TETRIS_TETRONIMO_SHAPE_O,
+    TETRIS_TETRONIMO_SHAPE_S,
+    TETRIS_TETRONIMO_SHAPE_L,
+    TETRIS_TETRONIMO_SHAPE_I,
+    TETRIS_TETRONIMO_SHAPE_COUNT,
+} tetris_tetronimo_shape;
+
+extern const char* const k_tetris_tetronimo_shape_names[TETRIS_TETRONIMO_SHAPE_COUNT];
 
 typedef struct tetris_tetronimo_rotation_t {
     tetris_tetronimo_row rows[TETRIS_TETRONIMO_MAX_HEIGHT];
@@ -22,15 +34,15 @@ typedef struct tetris_tetronimo_t {
     int current_rotation;                       // the index of the current rotation
     int x;                                      // the x position (matrix space) of the tetronimo
     int y;                                      // the y position (matrix space) of the tetronimo
-    bool is_grounded;                           // true when the tetronimo has hit another tetronimo (or the matrix floor) below it
+    tetris_tetronimo_shape shape;               // the shape of this tetronimo
+    bool is_locked;                           // true when the tetronimo has hit another tetronimo (or the matrix floor) below it
     bool is_active;                             // true when the tetronimo is active in the matrix
 } tetris_tetronimo;
 
 typedef struct {
     tetris_rand rand;                               // random number generator
-    const tetris_tetronimo* next;
-    const tetris_tetronimo* bag[TETRIS_TETRONIMO_COUNT];
-    int bag_remaining;
+    const tetris_tetronimo* next;                   // the next tetronimo that will be spawned
+    int num_spawned[TETRIS_TETRONIMO_SHAPE_COUNT];  // number of tetronimos spawned per shape
 } tetris_tetronimo_spawner;
 
 // creates a new tetronimo using the spawner and does an initial collision check

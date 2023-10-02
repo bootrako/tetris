@@ -56,8 +56,7 @@ int tetris_sim_get_tetronimo_max_width(const tetris_sim* sim);
 // get the max height of a tetronimo piece. pieces can be smaller than the max height
 int tetris_sim_get_tetronimo_max_height(const tetris_sim* sim);
 
-// returns true if (in tetronimo-space) the x and y value is a cell on the tetronimo -
-// this takes into account the tetronimo's current rotation
+// returns true if (in tetronimo-space) the x and y value is a cell on the tetronimo - this takes into account the tetronimo's current rotation
 bool tetris_sim_get_tetronimo_value(const tetris_sim* sim, int x, int y);
 
 // returns true if (in tetronimo-space) the x and y value is a cell on the next tetronimo
@@ -77,5 +76,14 @@ int tetris_sim_get_lines(const tetris_sim* sim);
 
 // return the current level
 int tetris_sim_get_level(const tetris_sim* sim);
+
+// returns the number of statistics
+int tetris_sim_get_statistic_count(const tetris_sim* sim);
+
+// returns the name of the statistic at a given index
+const char* tetris_sim_get_statistic_name(const tetris_sim* sim, int index);
+
+// returns the value of the statistic at a given index
+int tetris_sim_get_statistic_value(const tetris_sim* sim, int index);
 
 #endif // TETRIS_SIM_H

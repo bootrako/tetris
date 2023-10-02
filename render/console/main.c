@@ -99,7 +99,10 @@ static void console_render_deinit(console_render* render) {
     free(render);
 }
 
-static void console_render_draw_matrix_border(console_render* render, const int matrix_width, const int matrix_height) {
+static void console_render_draw_matrix_border(console_render* render, const tetris_sim* sim) {
+    const int matrix_width = tetris_sim_get_matrix_width(sim);
+    const int matrix_height = tetris_sim_get_matrix_height(sim);
+
     // top and bottom border
     for (int x = 0; x < matrix_width + CONSOLE_SIM_DRAW_X_PADDING * 2; ++x) {
         for (int y = 0; y < CONSOLE_SIM_DRAW_Y_PADDING; ++y) {
@@ -116,7 +119,10 @@ static void console_render_draw_matrix_border(console_render* render, const int 
     }
 }
 
-static void console_render_draw_matrix(console_render* render, const tetris_sim* sim, const int matrix_width, const int matrix_height) {
+static void console_render_draw_matrix(console_render* render, const tetris_sim* sim) {
+    const int matrix_width = tetris_sim_get_matrix_width(sim);
+    const int matrix_height = tetris_sim_get_matrix_height(sim);
+
     for (int y = 0; y < matrix_height; ++y) {
         // clear the existing line
         memset(render->screen + ((y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + CONSOLE_SIM_DRAW_X_PADDING), 0, matrix_width);
@@ -130,10 +136,12 @@ static void console_render_draw_matrix(console_render* render, const tetris_sim*
     }
 }
 
-static void console_render_draw_tetronimo(console_render* render, const tetris_sim* sim, const int tetronimo_max_width, const int tetronimo_max_height) {
+static void console_render_draw_tetronimo(console_render* render, const tetris_sim* sim) {
     if (!tetris_sim_is_tetronimo_active(sim)) {
         return;
     }
+    const int tetronimo_max_width = tetris_sim_get_tetronimo_max_width(sim);
+    const int tetronimo_max_height = tetris_sim_get_tetronimo_max_height(sim);
     const int pos_x = tetris_sim_get_tetronimo_pos_x(sim);
     const int pos_y = tetris_sim_get_tetronimo_pos_y(sim); 
     for (int tetronimo_y = 0; tetronimo_y < tetronimo_max_height; ++tetronimo_y) {
@@ -148,32 +156,55 @@ static void console_render_draw_tetronimo(console_render* render, const tetris_s
     }
 }
 
-static void console_render_draw_ui(console_render* render, const tetris_sim* sim, const int matrix_width, const int tetronimo_max_width, const int tetronimo_max_height) {
+static void console_render_draw_ui(console_render* render, const tetris_sim* sim) {
+    const int matrix_width = tetris_sim_get_matrix_width(sim);
+
     // draw text scores
     int draw_x = (matrix_width + CONSOLE_SIM_DRAW_X_PADDING * 2) + 3;
     int draw_y = 1;
     sprintf(render->screen + (draw_y * render->screen_width + draw_x), "SCORE");
-    draw_y = 2;
+    draw_y += 1;
     sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%d", tetris_sim_get_score(sim));
 
-    draw_y = 4;
+    draw_y += 2;
     sprintf(render->screen + (draw_y * render->screen_width + draw_x), "LINES");
-    draw_y = 5;
+    draw_y += 1;
     sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%d", tetris_sim_get_lines(sim));
 
-    draw_y = 7;
+    draw_y += 2;
     sprintf(render->screen + (draw_y * render->screen_width + draw_x), "LEVEL");
-    draw_y = 8;
+    draw_y += 1;
     sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%d", tetris_sim_get_level(sim));
 
     // draw next tetronimo
-    draw_y = 10;
+    const int tetronimo_max_width = tetris_sim_get_tetronimo_max_width(sim);
+    const int tetronimo_max_height = tetris_sim_get_tetronimo_max_height(sim);
+
+    draw_y += 2;
     sprintf(render->screen + (draw_y * render->screen_width + draw_x), "NEXT");
-    draw_y = 11;
-    for (int tetronimo_y = 0; tetronimo_y < tetronimo_max_height; ++tetronimo_y) {
+    draw_y += 1;
+    const int tetronimo_y_offset = 1;
+    for (int tetronimo_y = tetronimo_y_offset; tetronimo_y < tetronimo_max_height; ++tetronimo_y) {
         for (int tetronimo_x = 0; tetronimo_x < tetronimo_max_width; ++tetronimo_x) {
-            render->screen[(draw_y + tetronimo_y) * render->screen_width + (draw_x + tetronimo_x)] = tetris_sim_get_next_tetronimo_value(sim, tetronimo_x, tetronimo_y) ? CONSOLE_TETRONIMO_SET_CHAR : ' ';
+            render->screen[(draw_y + tetronimo_y - tetronimo_y_offset) * render->screen_width + (draw_x + tetronimo_x)] = tetris_sim_get_next_tetronimo_value(sim, tetronimo_x, tetronimo_y) ? CONSOLE_TETRONIMO_SET_CHAR : ' ';
         }
+    }
+
+    // draw statistics
+    const int statistic_count = tetris_sim_get_statistic_count(sim);
+
+    draw_y += tetronimo_max_height + 1;
+    sprintf(render->screen + (draw_y * render->screen_width + draw_x), "STATISTICS");
+    draw_y += 1;
+
+    memset(render->screen + (draw_y * render->screen_width + draw_x), 0, render->screen_width - draw_x);
+    memset(render->screen + ((draw_y + 1) * render->screen_width + draw_x), 0, render->screen_width - draw_x);
+    for (int stat = 0; stat < statistic_count; ++stat) {
+        sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%s", tetris_sim_get_statistic_name(sim, stat));
+        draw_y += 1;
+        draw_x += sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%d", tetris_sim_get_statistic_value(sim, stat));
+        draw_x += 1;
+        draw_y -= 1;
     }
 }
 
@@ -193,33 +224,27 @@ int main(int argc, const char** argv) {
     tetris_sim* sim = tetris_sim_init(sim_host, console_get_random_seed());
     console_render* render = console_render_init();
 
-    const int matrix_width = tetris_sim_get_matrix_width(sim);
-    const int matrix_height = tetris_sim_get_matrix_height(sim);
-    const int tetronimo_max_width = tetris_sim_get_tetronimo_max_width(sim);
-    const int tetronimo_max_height = tetris_sim_get_tetronimo_max_height(sim);
-
-    console_render_draw_matrix_border(render, matrix_width, matrix_height);
+    console_render_draw_matrix_border(render, sim);
 
     LARGE_INTEGER counter_frequency;
     QueryPerformanceFrequency(&counter_frequency);
 
+    const float time_per_frame = tetris_sim_time_per_frame(sim);
     float frame_time_accumulator = 0.0f;
-
     while (!tetris_sim_is_game_over(sim)) {
         LARGE_INTEGER counter_start;
         QueryPerformanceCounter(&counter_start);
 
         console_host_context_update(host_context);
 
-        const float time_per_frame = tetris_sim_time_per_frame(sim);
         while (frame_time_accumulator > time_per_frame) {
             tetris_sim_update(sim);
             frame_time_accumulator -= time_per_frame;
         }
 
-        console_render_draw_matrix(render, sim, matrix_width, matrix_height);
-        console_render_draw_tetronimo(render, sim, tetronimo_max_width, tetronimo_max_height);
-        console_render_draw_ui(render, sim, matrix_width, tetronimo_max_width, tetronimo_max_height);
+        console_render_draw_matrix(render, sim);
+        console_render_draw_tetronimo(render, sim);
+        console_render_draw_ui(render, sim);
         console_render_present(render);
 
         Sleep((DWORD)(time_per_frame * 1000.0f));
