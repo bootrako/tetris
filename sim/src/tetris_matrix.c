@@ -17,7 +17,7 @@ void tetris_matrix_init(tetris_matrix* matrix) {
 }
 
 // converts a tetronimo row to a matrix row, factoring in the tetronimo's x position
-static tetris_matrix_row tetris_matrix_tetronimo_row_to_matrix_row(const tetris_tetronimo* tetronimo, const int row) {
+static tetris_matrix_row tetris_tetronimo_row_to_matrix_row(const tetris_tetronimo* tetronimo, const int row) {
     const tetris_tetronimo_row tetronimo_row = tetronimo->rotations[tetronimo->current_rotation].rows[row];
     const int shift = TETRIS_MATRIX_ROW_BIT_LENGTH - TETRIS_MATRIX_ROW_BIT_PADDING - TETRIS_TETRONIMO_MAX_WIDTH - tetronimo->x;
     if (shift > 0) {
@@ -29,21 +29,28 @@ static tetris_matrix_row tetris_matrix_tetronimo_row_to_matrix_row(const tetris_
 
 void tetris_matrix_merge(tetris_matrix* matrix, const tetris_tetronimo* tetronimo) {
     for (int row = 0; row < TETRIS_TETRONIMO_MAX_HEIGHT; ++row) {
-        matrix->rows[row + tetronimo->y] |= tetris_matrix_tetronimo_row_to_matrix_row(tetronimo, row);
+        matrix->rows[row + tetronimo->y] |= tetris_tetronimo_row_to_matrix_row(tetronimo, row);
     }
 }
 
 bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo, const bool bounds_only) {
     for (int tetronimo_row = 0; tetronimo_row < TETRIS_TETRONIMO_MAX_HEIGHT; ++tetronimo_row) {
-        // check for overlap with matrix bits
-        const tetris_matrix_row matrix_row = bounds_only ? TETRIS_MATRIX_ROW_INIT : matrix->rows[tetronimo_row + tetronimo->y];
-        if ((matrix_row & tetris_matrix_tetronimo_row_to_matrix_row(tetronimo, tetronimo_row)) != 0) {
-            return true;
+        const int matrix_row_index = tetronimo_row + tetronimo->y;
+
+        // ignore collision above matrix
+        if (matrix_row_index < 0) {
+            continue;
+        }
+        
+        // check floor collision
+        if (matrix_row_index >= TETRIS_MATRIX_HEIGHT) {
+            return tetris_tetronimo_get_row(tetronimo, tetronimo_row) != 0;
         }
 
-        // check floor collision
-        if (tetronimo_row + tetronimo->y >= TETRIS_MATRIX_HEIGHT) {
-            return tetris_tetronimo_get_row(tetronimo, tetronimo_row) != 0;
+        // check for overlap with matrix bits
+        const tetris_matrix_row matrix_row = bounds_only ? TETRIS_MATRIX_ROW_INIT : matrix->rows[matrix_row_index];
+        if ((matrix_row & tetris_tetronimo_row_to_matrix_row(tetronimo, tetronimo_row)) != 0) {
+            return true;
         }
     }
 
