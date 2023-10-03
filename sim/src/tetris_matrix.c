@@ -58,6 +58,19 @@ bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* 
     return false;
 }
 
+int tetris_matrix_get_completed_lines(const tetris_matrix* matrix, int* out_rows) {
+    int num_completed_lines = 0;
+
+    for (int i = 0; i < TETRIS_MATRIX_HEIGHT; ++i) {
+        if (matrix->rows[i] == TETRIS_MATRIX_ROW_ALL_BITS_SET) {
+            out_rows[num_completed_lines] = i;
+            num_completed_lines++;
+        }
+    }
+
+    return num_completed_lines;
+}
+
 int tetris_matrix_remove_completed_lines(tetris_matrix* matrix) {
     int num_completed_lines = 0;
 

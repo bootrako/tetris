@@ -24,7 +24,10 @@ void tetris_matrix_merge(tetris_matrix* matrix, const tetris_tetronimo* tetronim
 // returns true if the tetronimo is overlapping a set bit on the matrix, or if the tetronimo is out of bounds.
 bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo, const bool bounds_only);
 
-// removes completed lines from the matrix
+// returns the number of completed lines without modifying the matrix
+int tetris_matrix_get_completed_lines(const tetris_matrix* matrix, int* out_rows);
+
+// removes completed lines from the matrix. returns the number of completed lines
 int tetris_matrix_remove_completed_lines(tetris_matrix* matrix);
 
 // given an x and y in matrix coordinates, returns true if the bit is set in the matrix
