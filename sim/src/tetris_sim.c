@@ -9,24 +9,29 @@
 #define TETRIS_HORIZONTAL_HOLD_TIMER (6)
 
 struct tetris_sim {
-    tetris_sim_host host;                       // the host interface
-    tetris_matrix matrix;                       // the play field
-    tetris_tetronimo_spawner spawner;           // spawner for new tetronimos
-    tetris_tetronimo tetronimo;                 // the current tetronimo on the play field
-    bool input_buffer[TETRIS_INPUT_COUNT * 2];  // buffer storing inputs for last and current frame
-    bool* input_pressed_prv;                    // points to last poll's inputs
-    bool* input_pressed_cur;                    // points to current poll's inputs
-    int score;                                  // total score
-    int lines;                                  // total number of lines cleared
-    int level;                                  // current level of the player
-    int fast_drop_count;                        // number of cells fast dropped for the current tetronimo
-    int drop_timer;                             // timer counting down till the next drop
-    int reset_timer;                            // timer counting down till the next tetronimo reset
-    int horizontal_timer;                       // timer related to holding left or right
-    int horizontal_dir;                         // the direction of left or right holding
-    bool horizontal_hold;                       // true when player is holding left or right
-    bool fast_drop;                             // true when player is dropping quickly by pressing the fast drop input
-    bool game_over;                             // true when the player has lost
+    tetris_sim_host host;                           // the host interface
+    tetris_matrix matrix;                           // the play field
+    tetris_tetronimo_spawner spawner;               // spawner for new tetronimos
+    tetris_tetronimo tetronimo;                     // the current tetronimo on the play field
+    bool input_buffer[TETRIS_INPUT_COUNT * 2];      // buffer storing inputs for last and current frame
+    bool* input_pressed_prv;                        // points to last poll's inputs
+    bool* input_pressed_cur;                        // points to current poll's inputs
+    int score;                                      // total score
+    int lines;                                      // total number of lines cleared
+    int level;                                      // current level of the player
+    int fast_drop_count;                            // number of cells fast dropped for the current tetronimo
+    int drop_timer;                                 // timer counting down till the next drop
+    int reset_timer;                                // timer counting down till the next tetronimo reset
+    int horizontal_timer;                           // timer related to holding left or right
+    int horizontal_dir;                             // the direction of left or right holding
+    int event_tetronimo_locked_num_rows_cleared;    // if tetronimo was locked this frame, the number of frames that were cleared
+    int event_tetronimo_locked_rows_cleared[TETRIS_TETRONIMO_MAX_HEIGHT]; // if tetronimo was locekd this frame, the list of rows that were cleared
+    bool horizontal_hold;                           // true when player is holding left or right
+    bool fast_drop;                                 // true when player is dropping quickly by pressing the fast drop input
+    bool game_over;                                 // true when the player has lost
+    bool event_tetronimo_spawned;                   // true if the tetronimo was spawned during this frame
+    bool event_tetronimo_moved;                     // true if the tetronimo moved during this frame
+    bool event_tetronimo_locked;                    // true if the tetronimo was locked in place during this frame
 };
 
 static void tetris_sim_poll_input(tetris_sim* sim) {
@@ -78,6 +83,9 @@ tetris_sim* tetris_sim_init(tetris_sim_host host, const uint64_t random_seed) {
     sim->horizontal_hold = false;
     sim->fast_drop = false;
     sim->game_over = false;
+    sim->event_tetronimo_spawned = false;
+    sim->event_tetronimo_moved = false;
+    sim->event_tetronimo_locked = false;
     return sim;
 }
 
@@ -89,6 +97,10 @@ void tetris_sim_update(tetris_sim* sim) {
     if (tetris_sim_is_game_over(sim)) {
         return;
     }
+
+    sim->event_tetronimo_spawned = false;
+    sim->event_tetronimo_moved = false;
+    sim->event_tetronimo_locked = false;
 
     tetris_sim_poll_input(sim);
 
@@ -105,7 +117,9 @@ void tetris_sim_update(tetris_sim* sim) {
 
     if (sim->tetronimo.is_active) {
         if (!sim->fast_drop && tetris_sim_input_just_pressed(sim, TETRIS_INPUT_MOVE_LEFT)) {
-            tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, -1, 0);
+            if (!tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, -1, 0)) {
+                sim->event_tetronimo_moved = true;
+            }
             sim->horizontal_hold = true;
             sim->horizontal_timer = TETRIS_HORIZONTAL_HOLD_DELAY;
             sim->horizontal_dir = -1;
@@ -116,7 +130,9 @@ void tetris_sim_update(tetris_sim* sim) {
         }
 
         if (!sim->fast_drop && tetris_sim_input_just_pressed(sim, TETRIS_INPUT_MOVE_RIGHT)) {
-            tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, 1, 0);
+            if (!tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, 1, 0)) {
+                sim->event_tetronimo_moved = true;
+            }
             sim->horizontal_hold = true;
             sim->horizontal_timer = TETRIS_HORIZONTAL_HOLD_DELAY;
             sim->horizontal_dir = 1;
@@ -129,30 +145,38 @@ void tetris_sim_update(tetris_sim* sim) {
         if (sim->horizontal_hold) {
             sim->horizontal_timer--;
             if (sim->horizontal_timer <= 0) {
-                tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, sim->horizontal_dir, 0);
+                if (!tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, sim->horizontal_dir, 0)) {
+                    sim->event_tetronimo_moved = true;
+                }
                 sim->horizontal_timer = TETRIS_HORIZONTAL_HOLD_TIMER;
             }
         }
 
         if (tetris_sim_input_just_pressed(sim, TETRIS_INPUT_ROTATE_LEFT)) {
             tetris_tetronimo_rotate(&sim->tetronimo, &sim->matrix, -1);
+            sim->event_tetronimo_moved = true;
         }
 
         if (tetris_sim_input_just_pressed(sim, TETRIS_INPUT_ROTATE_RIGHT)) {
             tetris_tetronimo_rotate(&sim->tetronimo, &sim->matrix, 1);
+            sim->event_tetronimo_moved = true;
         }
         
         sim->drop_timer--;
         if (sim->drop_timer <= 0) {
-            const bool has_collision = tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, 0, 1);
-            if (!has_collision && sim->fast_drop) {
-                sim->fast_drop_count++;
+            if (!tetris_tetronimo_move(&sim->tetronimo, &sim->matrix, 0, 1)) {
+                sim->event_tetronimo_moved = true;
+                if (sim->fast_drop) {
+                    sim->fast_drop_count++;
+                }
             }
             sim->drop_timer += sim->fast_drop ? TETRIS_FAST_DROP_TIMER : tetris_sim_calc_drop_timer(sim);
         }
 
         if (sim->tetronimo.is_locked) {
             tetris_matrix_merge(&sim->matrix, &sim->tetronimo);
+            sim->event_tetronimo_locked = true;
+            sim->event_tetronimo_locked_num_rows_cleared = tetris_matrix_get_completed_lines(&sim->matrix, sim->event_tetronimo_locked_rows_cleared);
             sim->tetronimo.is_active = false;
             sim->reset_timer = TETRIS_RESET_TIMER;
         } 
@@ -173,6 +197,7 @@ void tetris_sim_update(tetris_sim* sim) {
                 sim->game_over = true;
                 return;
             }
+            sim->event_tetronimo_spawned = true;
         }
     }
 }
@@ -247,4 +272,24 @@ const char* tetris_sim_get_statistic_name(const tetris_sim* sim, int index) {
 
 int tetris_sim_get_statistic_value(const tetris_sim* sim, int index) {
     return sim->spawner.num_spawned[index];
+}
+
+bool tetris_sim_event_tetronimo_spawned(const tetris_sim* sim) {
+    return sim->event_tetronimo_spawned;
+}
+
+bool tetris_sim_event_tetronimo_moved(const tetris_sim* sim) {
+    return sim->event_tetronimo_moved;
+}
+
+bool tetris_sim_event_tetronimo_locked(const tetris_sim* sim) {
+    return sim->event_tetronimo_locked;
+}
+
+int tetris_sim_event_tetronimo_locked_get_num_rows_cleared(const tetris_sim* sim) {
+    return sim->event_tetronimo_locked_num_rows_cleared;
+}
+
+const int* tetris_sim_event_tetronimo_locked_get_rows_cleared(const tetris_sim* sim) {
+    return sim->event_tetronimo_locked_rows_cleared;
 }

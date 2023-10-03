@@ -66,6 +66,7 @@ static uint64_t console_get_random_seed() {
 #define CONSOLE_SIM_DRAW_Y_PADDING (3)
 #define CONSOLE_MATRIX_BORDER_CHAR ('.')
 #define CONSOLE_MATRIX_SET_CHAR ('x')
+#define CONSOLE_MATRIX_CLEAR_CHAR ('o')
 #define CONSOLE_TETRONIMO_SET_CHAR ('x')
 
 typedef struct console_render_t {
@@ -119,7 +120,7 @@ static void console_render_draw_matrix_border(console_render* render, const tetr
     }
 }
 
-static void console_render_draw_matrix(console_render* render, const tetris_sim* sim) {
+static void console_render_draw_matrix(console_render* render, const tetris_sim* sim, const int* rows_cleared, const int num_rows_cleared) {
     const int matrix_width = tetris_sim_get_matrix_width(sim);
     const int matrix_height = tetris_sim_get_matrix_height(sim);
 
@@ -133,6 +134,11 @@ static void console_render_draw_matrix(console_render* render, const tetris_sim*
                 render->screen[(y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + x + CONSOLE_SIM_DRAW_X_PADDING] = CONSOLE_MATRIX_SET_CHAR;
             }
         }
+    }
+
+    // draw over the cleared lines with a special char
+    for (int row = 0; row < num_rows_cleared; ++row) {
+        memset(render->screen + ((rows_cleared[row] + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + CONSOLE_SIM_DRAW_X_PADDING), CONSOLE_MATRIX_CLEAR_CHAR, matrix_width);
     }
 }
 
@@ -224,7 +230,14 @@ int main(int argc, const char** argv) {
     tetris_sim* sim = tetris_sim_init(sim_host, console_get_random_seed());
     console_render* render = console_render_init();
 
+    // caching these values to display cleared lines until tetronimo respawn
+    int* rows_cleared = (int*)malloc(sizeof(int) * tetris_sim_get_tetronimo_max_height(sim));
+    int num_rows_cleared = 0;
+
     console_render_draw_matrix_border(render, sim);
+    console_render_draw_matrix(render, sim, NULL, 0);
+    console_render_draw_tetronimo(render, sim);
+    console_render_draw_ui(render, sim);
 
     LARGE_INTEGER counter_frequency;
     QueryPerformanceFrequency(&counter_frequency);
@@ -237,22 +250,54 @@ int main(int argc, const char** argv) {
 
         console_host_context_update(host_context);
 
+        bool tetronimo_spawned = false;
+        bool tetronimo_moved = false;
+        bool tetronimo_locked = false;
         while (frame_time_accumulator > time_per_frame) {
             tetris_sim_update(sim);
+            tetronimo_spawned |= tetris_sim_event_tetronimo_spawned(sim);
+            tetronimo_moved |= tetris_sim_event_tetronimo_moved(sim);
+            tetronimo_locked |= tetris_sim_event_tetronimo_locked(sim);
             frame_time_accumulator -= time_per_frame;
         }
 
-        console_render_draw_matrix(render, sim);
-        console_render_draw_tetronimo(render, sim);
-        console_render_draw_ui(render, sim);
-        console_render_present(render);
+        if (tetronimo_locked) {
+            num_rows_cleared = tetris_sim_event_tetronimo_locked_get_num_rows_cleared(sim);
+            const int* rows_cleared_this_frame = tetris_sim_event_tetronimo_locked_get_rows_cleared(sim);
+            for (int i = 0; i < num_rows_cleared; ++i) {
+                rows_cleared[i] = rows_cleared_this_frame[i];
+            }
+        }
+
+        if (tetronimo_spawned) {
+            num_rows_cleared = 0;
+        }
+
+        bool screen_dirty = false;
+        if (tetronimo_spawned || tetronimo_moved || tetronimo_locked) {
+            console_render_draw_matrix(render, sim, rows_cleared, num_rows_cleared);
+            console_render_draw_tetronimo(render, sim);
+            screen_dirty = true;
+        }
+        if (tetronimo_spawned) {
+            console_render_draw_ui(render, sim);
+            screen_dirty = true;
+        }
+        if (screen_dirty) {
+            console_render_present(render);
+        }
 
         Sleep((DWORD)(time_per_frame * 1000.0f));
 
         LARGE_INTEGER counter_end;
         QueryPerformanceCounter(&counter_end);
 
-        frame_time_accumulator += (float)(counter_end.QuadPart - counter_start.QuadPart) / (float)(counter_frequency.QuadPart);
+        const float max_frame_time = time_per_frame * 10.0f;
+        float frame_time = (float)(counter_end.QuadPart - counter_start.QuadPart) / (float)(counter_frequency.QuadPart);
+        if (frame_time > max_frame_time) {
+            frame_time = max_frame_time;
+        }
+        frame_time_accumulator += frame_time;
     }
 
     console_render_deinit(render);

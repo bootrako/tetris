@@ -86,4 +86,11 @@ const char* tetris_sim_get_statistic_name(const tetris_sim* sim, int index);
 // returns the value of the statistic at a given index
 int tetris_sim_get_statistic_value(const tetris_sim* sim, int index);
 
+bool tetris_sim_event_tetronimo_spawned(const tetris_sim* sim);
+bool tetris_sim_event_tetronimo_moved(const tetris_sim* sim);
+
+bool tetris_sim_event_tetronimo_locked(const tetris_sim* sim);
+int tetris_sim_event_tetronimo_locked_get_num_rows_cleared(const tetris_sim* sim);
+const int* tetris_sim_event_tetronimo_locked_get_rows_cleared(const tetris_sim* sim); 
+
 #endif // TETRIS_SIM_H
