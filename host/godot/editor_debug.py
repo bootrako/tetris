@@ -1,0 +1,5 @@
+platform = "windows"
+use_mingw = "yes"
+use_llvm = "yes"
+dev_build = "yes"
+compiledb = "yes"
