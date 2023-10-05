@@ -11,73 +11,80 @@ const char* const k_tetris_tetronimo_shape_names[TETRIS_TETRONIMO_SHAPE_COUNT] =
     "L", // TETRIS_TETRONIMO_SHAPE_L
     "I"  // TETRIS_TETRONIMO_SHAPE_I
 };
-
+ 
+// A            // B            // C            // D
 // . . . . 0000 // . . . . 0000 // . . . . 0000 // . . . . 0000 
 // . . . . 0000 // . . x . 0010 // . . x . 0010 // . . x . 0010
 // . x x x 0111 // . x x . 0110 // . x x x 0111 // . . x x 0011
 // . . x . 0010 // . . x . 0010 // . . . . 0000 // . . x . 0010
 static const tetris_tetronimo_rotation k_tetronimo_t[] = {
-    { .rows = { 0x0, 0x0, 0x7, 0x2 } },
-    { .rows = { 0x0, 0x2, 0x6, 0x2 } },
-    { .rows = { 0x0, 0x2, 0x7, 0x0 } },
-    { .rows = { 0x0, 0x2, 0x3, 0x2 } }
+    { .rows = { 0x0, 0x0, 0x7, 0x2 } }, // A
+    { .rows = { 0x0, 0x2, 0x6, 0x2 } }, // B
+    { .rows = { 0x0, 0x2, 0x7, 0x0 } }, // C
+    { .rows = { 0x0, 0x2, 0x3, 0x2 } }  // D
 };
 
+// A            // B            // C            // D
 // . . . . 0000 // . . . . 0000 // . . . . 0000 // . . . . 0000
 // . . . . 0000 // . . x . 0010 // . x . . 0100 // . . x x 0011
 // . x x x 0111 // . . x . 0010 // . x x x 0111 // . . x . 0010
 // . . . x 0001 // . x x . 0110 // . . . . 0000 // . . x . 0010
 static const tetris_tetronimo_rotation k_tetronimo_j[] = {
-    { .rows = { 0x0, 0x0, 0x7, 0x1 } },
-    { .rows = { 0x0, 0x2, 0x2, 0x6 } },
-    { .rows = { 0x0, 0x4, 0x7, 0x0 } },
-    { .rows = { 0x0, 0x3, 0x2, 0x2 } }
+    { .rows = { 0x0, 0x0, 0x7, 0x1 } }, // A
+    { .rows = { 0x0, 0x2, 0x2, 0x6 } }, // B
+    { .rows = { 0x0, 0x4, 0x7, 0x0 } }, // C
+    { .rows = { 0x0, 0x3, 0x2, 0x2 } }  // D
 };
 
+// A            // B
 // . . . . 0000 // . . . . 0000
 // . . . . 0000 // . . . x 0001
 // . x x . 0110 // . . x x 0011
 // . . x x 0011 // . . x . 0010
 static const tetris_tetronimo_rotation k_tetronimo_z[] = {
-    { .rows = { 0x0, 0x0, 0x6, 0x3 } },
-    { .rows = { 0x0, 0x1, 0x3, 0x2 } }
+    { .rows = { 0x0, 0x0, 0x6, 0x3 } }, // A
+    { .rows = { 0x0, 0x1, 0x3, 0x2 } }  // B
 };
 
+// A
 // . . . .  0000
 // . . . .  0000
 // . x x .  0110
 // . x x .  0110
 static const tetris_tetronimo_rotation k_tetronimo_o[] = { 
-    { .rows = { 0x0, 0x0, 0x6, 0x6 } }
+    { .rows = { 0x0, 0x0, 0x6, 0x6 } }  // A
 };
 
+// A            // B
 // . . . . 0000 // . . . . 0000
 // . . . . 0000 // . . x . 0010
 // . . x x 0011 // . . x x 0011
 // . x x . 0110 // . . . x 0001
 static const tetris_tetronimo_rotation k_tetronimo_s[] = {
-    { .rows = { 0x0, 0x0, 0x3, 0x6 } },
-    { .rows = { 0x0, 0x2, 0x3, 0x1 } }
+    { .rows = { 0x0, 0x0, 0x3, 0x6 } }, // A
+    { .rows = { 0x0, 0x2, 0x3, 0x1 } }  // B
 };
 
+// A            // B            // C            // D
 // . . . . 0000 // . . . . 0000 // . . . . 0000 // . . . . 0000 
 // . . . . 0000 // . x x . 0110 // . . . x 0001 // . . x . 0010
 // . x x x 0111 // . . x . 0010 // . x x x 0111 // . . x . 0010
 // . x . . 0100 // . . x . 0010 // . . . . 0000 // . . x x 0011
 static const tetris_tetronimo_rotation k_tetronimo_l[] = {
-    { .rows = { 0x0, 0x0, 0x7, 0x4 } },
-    { .rows = { 0x0, 0x6, 0x2, 0x2 } },
-    { .rows = { 0x0, 0x1, 0x7, 0x0 } },
-    { .rows = { 0x0, 0x2, 0x2, 0x3 } }
+    { .rows = { 0x0, 0x0, 0x7, 0x4 } }, // A
+    { .rows = { 0x0, 0x6, 0x2, 0x2 } }, // B
+    { .rows = { 0x0, 0x1, 0x7, 0x0 } }, // C
+    { .rows = { 0x0, 0x2, 0x2, 0x3 } }  // D
 };
 
+// A            // B
 // . . . . 0000 // . . x . 0010
 // . . . . 0000 // . . x . 0010
 // x x x x 1111 // . . x . 0010
 // . . . . 0000 // . . x . 0010
 static const tetris_tetronimo_rotation k_tetronimo_i[] = { 
-    { .rows = { 0x0, 0x0, 0xF, 0x0 } },
-    { .rows = { 0x2, 0x2, 0x2, 0x2 } }
+    { .rows = { 0x0, 0x0, 0xF, 0x0 } }, // A
+    { .rows = { 0x2, 0x2, 0x2, 0x2 } }  // B
 };
 
 static const tetris_tetronimo k_tetronimoes[TETRIS_TETRONIMO_SHAPE_COUNT] = {

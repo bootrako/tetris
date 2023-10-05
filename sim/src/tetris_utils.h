@@ -1,9 +1,11 @@
 #ifndef TETRIS_UTILS_H
 #define TETRIS_UTILS_H
 
-#define TETRIS_ARRAY_LEN(array) (sizeof(array) / sizeof(array[0]))
-
 #include <stdint.h>
+
+#define TETRIS_XSTR(str) #str
+#define TETRIS_STR(str) TETRIS_XSTR(str)
+#define TETRIS_ARRAY_LEN(array) (sizeof(array) / sizeof(array[0]))
 
 typedef struct tetris_ctx_t tetris_ctx;
 

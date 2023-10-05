@@ -1,4 +1,3 @@
-#include "tetris_sim.h"
 #include "tetris_ctx.h"
 #include "tetris_matrix.h"
 #include "tetris_tetronimo.h"
@@ -152,12 +151,12 @@ void tetris_sim_update(tetris_sim* sim) {
                     sim->fast_drop_count++;
                 }
             }
-            sim->drop_timer += sim->fast_drop ? TETRIS_FAST_DROP_TIMER : tetris_sim_calc_drop_timer(sim);
+            sim->drop_timer = sim->fast_drop ? TETRIS_FAST_DROP_TIMER : tetris_sim_calc_drop_timer(sim);
         }
 
+        // tetronimo is locked
         if (!sim->tetronimo.is_active) {
             tetris_matrix_merge(&sim->ctx, &sim->matrix, &sim->tetronimo);
-            sim->tetronimo.is_active = false;
             sim->reset_timer = TETRIS_RESET_TIMER;
         } 
     } else {

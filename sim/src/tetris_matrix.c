@@ -67,13 +67,13 @@ bool tetris_matrix_is_tetronimo_valid(const tetris_ctx* ctx, const tetris_matrix
 }
 
 int tetris_matrix_remove_cleared_lines(tetris_ctx* ctx, tetris_matrix* matrix) {
-    int num_completed_lines = 0;
+    int num_cleared_lines = 0;
 
     const tetris_matrix_row* read = &matrix->rows[TETRIS_MATRIX_HEIGHT - 1];
     tetris_matrix_row* write = &matrix->rows[TETRIS_MATRIX_HEIGHT - 1];
     while (read != &matrix->rows[0]) {
         if (*read == TETRIS_MATRIX_ROW_ALL_BITS_SET) {
-            num_completed_lines++;
+            num_cleared_lines++;
         } else {
             *write = *read;
             write--;
@@ -85,7 +85,7 @@ int tetris_matrix_remove_cleared_lines(tetris_ctx* ctx, tetris_matrix* matrix) {
         write--;
     }
 
-    return num_completed_lines;
+    return num_cleared_lines;
 }
 
 bool tetris_matrix_get_value(const tetris_ctx* ctx, const tetris_matrix* matrix, const int x, const int y) {
