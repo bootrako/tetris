@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stddef.h>
 
 typedef enum tetris_input_t {
     TETRIS_INPUT_MOVE_LEFT,
@@ -17,6 +16,7 @@ typedef enum tetris_input_t {
 typedef struct {
     void*(*alloc)(void* context, size_t size);                  // allocate memory with the given size
     void(*free)(void* context, void* ptr);                      // free allocated memory
+    void(*panic)(void* context, const char* err_msg);           // called when an unrecoverable error has occurred
     bool(*input_pressed)(void* context, tetris_input input);    // returns true if an input is currently pressed
     void* context;                                              // context object for storing host data
 } tetris_sim_host;
@@ -86,11 +86,19 @@ const char* tetris_sim_get_statistic_name(const tetris_sim* sim, int index);
 // returns the value of the statistic at a given index
 int tetris_sim_get_statistic_value(const tetris_sim* sim, int index);
 
+// returns true if a tetronimo was spawned this frame
 bool tetris_sim_event_tetronimo_spawned(const tetris_sim* sim);
+
+// returns true if a tetronimo was moved this frame
 bool tetris_sim_event_tetronimo_moved(const tetris_sim* sim);
 
+// returns true if a tetronimo was locked in place this frame
 bool tetris_sim_event_tetronimo_locked(const tetris_sim* sim);
-int tetris_sim_event_tetronimo_locked_get_num_rows_cleared(const tetris_sim* sim);
-const int* tetris_sim_event_tetronimo_locked_get_rows_cleared(const tetris_sim* sim); 
+
+// returns the number of matrix rows cleared this frame
+int tetris_sim_event_num_matrix_rows_cleared(const tetris_sim* sim);
+
+// returns an array of the which matrix row indices were cleared this frame
+const int* tetris_sim_event_matrix_rows_cleared(const tetris_sim* sim); 
 
 #endif // TETRIS_SIM_H

@@ -27,6 +27,11 @@ static void console_host_free(void* context, void* ptr) {
     free(ptr);
 }
 
+static void console_host_panic(void* context, const char* err_msg) {
+    printf("%s\n", err_msg);
+    abort();
+}
+
 static bool console_host_input_pressed(void* context, tetris_input input) {
     console_host_context* host_context = (console_host_context*)context;
     return host_context->input_pressed[input];
@@ -224,6 +229,7 @@ int main(int argc, const char** argv) {
     const tetris_sim_host sim_host = {
         .alloc = console_host_alloc,
         .free = console_host_free,
+        .panic = console_host_panic,
         .input_pressed = console_host_input_pressed,
         .context = host_context,
     };
@@ -238,6 +244,7 @@ int main(int argc, const char** argv) {
     console_render_draw_matrix(render, sim, NULL, 0);
     console_render_draw_tetronimo(render, sim);
     console_render_draw_ui(render, sim);
+    console_render_present(render);
 
     LARGE_INTEGER counter_frequency;
     QueryPerformanceFrequency(&counter_frequency);
@@ -252,21 +259,19 @@ int main(int argc, const char** argv) {
 
         bool tetronimo_spawned = false;
         bool tetronimo_moved = false;
-        bool tetronimo_locked = false;
         while (frame_time_accumulator > time_per_frame) {
             tetris_sim_update(sim);
             tetronimo_spawned |= tetris_sim_event_tetronimo_spawned(sim);
             tetronimo_moved |= tetris_sim_event_tetronimo_moved(sim);
-            tetronimo_locked |= tetris_sim_event_tetronimo_locked(sim);
-            frame_time_accumulator -= time_per_frame;
-        }
-
-        if (tetronimo_locked) {
-            num_rows_cleared = tetris_sim_event_tetronimo_locked_get_num_rows_cleared(sim);
-            const int* rows_cleared_this_frame = tetris_sim_event_tetronimo_locked_get_rows_cleared(sim);
-            for (int i = 0; i < num_rows_cleared; ++i) {
-                rows_cleared[i] = rows_cleared_this_frame[i];
+            int num_rows_cleared_this_frame = tetris_sim_event_num_matrix_rows_cleared(sim);
+            if (num_rows_cleared_this_frame != 0) {
+                num_rows_cleared = num_rows_cleared_this_frame;
+                const int* rows_cleared_this_frame = tetris_sim_event_matrix_rows_cleared(sim);
+                for (int i = 0; i < num_rows_cleared; ++i) {
+                    rows_cleared[i] = rows_cleared_this_frame[i];
+                }
             }
+            frame_time_accumulator -= time_per_frame;
         }
 
         if (tetronimo_spawned) {
@@ -274,7 +279,7 @@ int main(int argc, const char** argv) {
         }
 
         bool screen_dirty = false;
-        if (tetronimo_spawned || tetronimo_moved || tetronimo_locked) {
+        if (tetronimo_spawned || tetronimo_moved || num_rows_cleared != 0) {
             console_render_draw_matrix(render, sim, rows_cleared, num_rows_cleared);
             console_render_draw_tetronimo(render, sim);
             screen_dirty = true;
