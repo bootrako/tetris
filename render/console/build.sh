@@ -16,7 +16,7 @@ done
 ar r lib/tetris_sim.lib $tetris_sim_objs
 
 # console app (exe)
-console_render_srcs=(main.c)
+console_render_srcs=(console_host.c console_render.c main.c)
 if [ "$1" == "release" ]; then
     clang -O3 -DNDEBUG ${console_render_srcs[@]} -o bin/tetris_console.exe -Llib -ltetris_sim -I../../sim/include
 else
