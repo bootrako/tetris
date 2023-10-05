@@ -1,0 +1,3 @@
+[submodule "host/godot/godot"]
+	path = host/godot/godot
+	url = https://github.com/godotengine/godot
