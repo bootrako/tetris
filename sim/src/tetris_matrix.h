@@ -4,33 +4,31 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef struct tetris_ctx_t tetris_ctx;
 typedef struct tetris_tetronimo_t tetris_tetronimo;
 
 // config
 #define TETRIS_MATRIX_WIDTH 10
 #define TETRIS_MATRIX_HEIGHT 20
-typedef uint16_t tetris_matrix_row;     // needs to have enough bits to hold matrix width
+typedef uint16_t tetris_matrix_row;                 // needs to have enough bits to hold matrix width
 
 typedef struct tetris_matrix_t {
-    tetris_matrix_row rows[TETRIS_MATRIX_HEIGHT];
+    tetris_matrix_row rows[TETRIS_MATRIX_HEIGHT];   // for each row of the matrix, the central TETRIS_MATRIX_WIDTH bits represent the row state
 } tetris_matrix;
 
 // initializes the matrix bits
-void tetris_matrix_init(tetris_matrix* matrix);
+void tetris_matrix_init(tetris_ctx* ctx, tetris_matrix* matrix);
 
 // merges a tetronimo into a matrix, so that the tetronimo's rows become part of the matrix's
-void tetris_matrix_merge(tetris_matrix* matrix, const tetris_tetronimo* tetronimo);
+void tetris_matrix_merge(tetris_ctx* ctx, tetris_matrix* matrix, const tetris_tetronimo* tetronimo);
 
-// returns true if the tetronimo is overlapping a set bit on the matrix, or if the tetronimo is out of bounds.
-bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo, const bool bounds_only);
+// returns false if the tetronimo is overlapping a set bit on the matrix, or if the tetronimo is out of bounds.
+bool tetris_matrix_is_tetronimo_valid(const tetris_ctx* ctx, const tetris_matrix* matrix, const tetris_tetronimo* tetronimo);
 
-// returns the number of completed lines without modifying the matrix
-int tetris_matrix_get_completed_lines(const tetris_matrix* matrix, int* out_rows);
-
-// removes completed lines from the matrix. returns the number of completed lines
-int tetris_matrix_remove_completed_lines(tetris_matrix* matrix);
+// removes cleared lines from the matrix. returns the number of cleared lines
+int tetris_matrix_remove_cleared_lines(tetris_ctx* ctx, tetris_matrix* matrix);
 
 // given an x and y in matrix coordinates, returns true if the bit is set in the matrix
-bool tetris_matrix_get_value(const tetris_matrix* matrix, const int x, const int y);
+bool tetris_matrix_get_value(const tetris_ctx* ctx, const tetris_matrix* matrix, const int x, const int y);
 
 #endif // TETRIS_MATRIX_H

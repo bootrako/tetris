@@ -1,4 +1,5 @@
 #include "tetris_matrix.h"
+#include "tetris_ctx.h"
 #include "tetris_tetronimo.h"
 
 #define TETRIS_MATRIX_ROW_BIT_LENGTH (sizeof(tetris_matrix_row) * 8)
@@ -10,68 +11,62 @@
 // 0b1110 0000 0000 0111
 #define TETRIS_MATRIX_ROW_INIT (~((TETRIS_MATRIX_ROW_ALL_BITS_SET >> TETRIS_MATRIX_ROW_BIT_PADDING) & ~(TETRIS_MATRIX_ROW_ALL_BITS_SET >> (TETRIS_MATRIX_ROW_BIT_LENGTH - TETRIS_MATRIX_ROW_BIT_PADDING))))
 
-void tetris_matrix_init(tetris_matrix* matrix) {
+// converts a tetronimo row to a matrix row, factoring in the tetronimo's x position
+static tetris_matrix_row tetris_tetronimo_row_to_matrix_row(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int row) {
+    const tetris_matrix_row matrix_row = tetris_tetronimo_get_row(ctx, tetronimo, row);
+    const int shift = TETRIS_MATRIX_ROW_BIT_LENGTH - TETRIS_MATRIX_ROW_BIT_PADDING - TETRIS_TETRONIMO_MAX_WIDTH - tetronimo->x;
+    return (shift >= 0) ? matrix_row << shift : matrix_row >> -shift;
+}
+
+void tetris_matrix_init(tetris_ctx* ctx, tetris_matrix* matrix) {
     for (int row = 0; row < TETRIS_MATRIX_HEIGHT; ++row) {
         matrix->rows[row] = TETRIS_MATRIX_ROW_INIT;
     }
 }
 
-// converts a tetronimo row to a matrix row, factoring in the tetronimo's x position
-static tetris_matrix_row tetris_tetronimo_row_to_matrix_row(const tetris_tetronimo* tetronimo, const int row) {
-    const tetris_tetronimo_row tetronimo_row = tetronimo->rotations[tetronimo->current_rotation].rows[row];
-    const int shift = TETRIS_MATRIX_ROW_BIT_LENGTH - TETRIS_MATRIX_ROW_BIT_PADDING - TETRIS_TETRONIMO_MAX_WIDTH - tetronimo->x;
-    if (shift > 0) {
-        return ((tetris_matrix_row)tetronimo_row) << shift;
-    } else {
-        return ((tetris_matrix_row)tetronimo_row) >> -shift;
-    }
-}
-
-void tetris_matrix_merge(tetris_matrix* matrix, const tetris_tetronimo* tetronimo) {
+void tetris_matrix_merge(tetris_ctx* ctx, tetris_matrix* matrix, const tetris_tetronimo* tetronimo) {
+    ctx->events.num_matrix_rows_cleared = 0;
     for (int row = 0; row < TETRIS_TETRONIMO_MAX_HEIGHT; ++row) {
-        matrix->rows[row + tetronimo->y] |= tetris_tetronimo_row_to_matrix_row(tetronimo, row);
+        const int matrix_row_index = row + tetronimo->y;
+        if (matrix_row_index < 0) {
+            continue;
+        }
+        if (matrix_row_index >= TETRIS_MATRIX_HEIGHT) {
+            break;
+        }
+        matrix->rows[matrix_row_index] |= tetris_tetronimo_row_to_matrix_row(ctx, tetronimo, row);
+        if (matrix->rows[matrix_row_index] == TETRIS_MATRIX_ROW_ALL_BITS_SET) {
+            ctx->events.matrix_rows_cleared[ctx->events.num_matrix_rows_cleared] = matrix_row_index;
+            ctx->events.num_matrix_rows_cleared++;
+        }
     }
 }
 
-bool tetris_matrix_collide(const tetris_matrix* matrix, const tetris_tetronimo* tetronimo, const bool bounds_only) {
+bool tetris_matrix_is_tetronimo_valid(const tetris_ctx* ctx, const tetris_matrix* matrix, const tetris_tetronimo* tetronimo) {
     for (int tetronimo_row = 0; tetronimo_row < TETRIS_TETRONIMO_MAX_HEIGHT; ++tetronimo_row) {
         const int matrix_row_index = tetronimo_row + tetronimo->y;
 
-        // ignore collision above matrix
+        // ignore anything above matrix
         if (matrix_row_index < 0) {
             continue;
         }
         
-        // check floor collision
+        // check floor overlap
         if (matrix_row_index >= TETRIS_MATRIX_HEIGHT) {
-            return tetris_tetronimo_get_row(tetronimo, tetronimo_row) != 0;
+            return tetris_tetronimo_get_row(ctx, tetronimo, tetronimo_row) == 0;
         }
 
         // check for overlap with matrix bits
-        const tetris_matrix_row matrix_row = bounds_only ? TETRIS_MATRIX_ROW_INIT : matrix->rows[matrix_row_index];
-        if ((matrix_row & tetris_tetronimo_row_to_matrix_row(tetronimo, tetronimo_row)) != 0) {
-            return true;
+        if ((matrix->rows[matrix_row_index] & tetris_tetronimo_row_to_matrix_row(ctx, tetronimo, tetronimo_row)) != 0) {
+            return false;
         }
     }
 
-    // if we get here, no collision
-    return false;
+    // if we get here, no overlap
+    return true;
 }
 
-int tetris_matrix_get_completed_lines(const tetris_matrix* matrix, int* out_rows) {
-    int num_completed_lines = 0;
-
-    for (int i = 0; i < TETRIS_MATRIX_HEIGHT; ++i) {
-        if (matrix->rows[i] == TETRIS_MATRIX_ROW_ALL_BITS_SET) {
-            out_rows[num_completed_lines] = i;
-            num_completed_lines++;
-        }
-    }
-
-    return num_completed_lines;
-}
-
-int tetris_matrix_remove_completed_lines(tetris_matrix* matrix) {
+int tetris_matrix_remove_cleared_lines(tetris_ctx* ctx, tetris_matrix* matrix) {
     int num_completed_lines = 0;
 
     const tetris_matrix_row* read = &matrix->rows[TETRIS_MATRIX_HEIGHT - 1];
@@ -93,6 +88,8 @@ int tetris_matrix_remove_completed_lines(tetris_matrix* matrix) {
     return num_completed_lines;
 }
 
-bool tetris_matrix_get_value(const tetris_matrix* matrix, const int x, const int y) {
+bool tetris_matrix_get_value(const tetris_ctx* ctx, const tetris_matrix* matrix, const int x, const int y) {
+    TETRIS_CTX_CHECK(ctx, x >= 0 && x < TETRIS_MATRIX_WIDTH);
+    TETRIS_CTX_CHECK(ctx, y >= 0 && y < TETRIS_MATRIX_HEIGHT);
     return (matrix->rows[y] >> (TETRIS_MATRIX_ROW_BIT_LENGTH - TETRIS_MATRIX_ROW_BIT_PADDING - 1 - x)) & 1;
 }
