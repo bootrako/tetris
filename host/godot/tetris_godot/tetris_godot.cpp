@@ -1,23 +1,15 @@
 #include "tetris_godot.h"
+#include <tetris_sim.h>
 
-void Tetris::add(int p_value) {
-    count += p_value;
+Tetris::Tetris() {
+    tetris_sim_host host;
+    sim = tetris_sim_init(host, 0);
 }
 
-void Tetris::reset() {
-    count = 0;
-}
-
-int Tetris::get_total() const {
-    return count;
+Tetris::~Tetris() {
+    tetris_sim_deinit(sim);
 }
 
 void Tetris::_bind_methods() {
-    ClassDB::bind_method(D_METHOD("add", "value"), &Tetris::add);
-    ClassDB::bind_method(D_METHOD("reset"), &Tetris::reset);
-    ClassDB::bind_method(D_METHOD("get_total"), &Tetris::get_total);
-}
-
-Tetris::Tetris() {
-    count = 0;
+    //ClassDB::bind_method(D_METHOD("add", "value"), &Tetris::add);
 }

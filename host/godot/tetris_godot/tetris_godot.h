@@ -3,20 +3,17 @@
 
 #include "core/object/ref_counted.h"
 
+struct tetris_sim;
+
 class Tetris : public RefCounted {
     GDCLASS(Tetris, RefCounted);
-
-    int count;
-
+public:
+    Tetris();
+    virtual ~Tetris();
 protected:
     static void _bind_methods();
-
-public:
-    void add(int p_value);
-    void reset();
-    int get_total() const;
-
-    Tetris();
+private:
+    tetris_sim* sim;
 };
 
 #endif // TETRIS_GODOT_H

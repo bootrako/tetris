@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+Import("env")
+Import("env_modules")
+
+tetris_sim_srcs = [
+    "src/tetris_ctx.c",
+    "src/tetris_events.c",
+    "src/tetris_matrix.c",
+    "src/tetris_sim.c",
+    "src/tetris_tetronimo.c",
+    "src/tetris_utils.c"
+]
+tetris_sim_obj = []
+
+env_tetris_sim = env_modules.Clone()
+env_tetris_sim.Prepend(CPPPATH=["include"])
+env_tetris_sim.add_source_files(tetris_sim_obj, tetris_sim_srcs)
+env.modules_sources += tetris_sim_obj
+
+Return("tetris_sim_obj")
