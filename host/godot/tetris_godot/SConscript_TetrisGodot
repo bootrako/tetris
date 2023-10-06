@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+
+Import("env")
+Import("env_modules")
+
+tetris_godot_srcs = [
+    "register_types.cpp",
+    "tetris_godot.cpp"
+]
+tetris_godot_obj = []
+
+env_tetris_godot = env_modules.Clone()
+env_tetris_godot.Prepend(CPPPATH=["../../../../../sim/include"])
+env_tetris_godot.add_source_files(tetris_godot_obj, tetris_godot_srcs)
+env.modules_sources += tetris_godot_obj
+
+Return("tetris_godot_obj")

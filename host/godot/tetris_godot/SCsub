@@ -1,2 +1,8 @@
-Import('env')
-env.add_source_files(env.modules_sources, "*.cpp")
+#!/usr/bin/env python
+
+Import("env")
+
+tetris_godot_obj = SConscript("SConscript_TetrisGodot", variant_dir = "build/tetris_godot")
+tetris_sim_obj = SConscript("SConscript_TetrisSim", src_dir="../../../sim", variant_dir = "../../../host/godot/tetris_godot/build/tetris_sim")
+
+env.Depends(tetris_godot_obj, tetris_sim_obj)

@@ -4,6 +4,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef enum tetris_input_t {
     TETRIS_INPUT_MOVE_LEFT,
     TETRIS_INPUT_MOVE_RIGHT,
@@ -100,5 +104,9 @@ int tetris_sim_event_num_matrix_rows_cleared(const tetris_sim* sim);
 
 // returns an array of the which matrix row indices were cleared this frame
 const int* tetris_sim_event_matrix_rows_cleared(const tetris_sim* sim); 
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // TETRIS_SIM_H
