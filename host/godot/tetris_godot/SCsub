@@ -2,7 +2,7 @@
 
 Import("env")
 
-tetris_godot_obj = SConscript("SConscript_TetrisGodot", variant_dir = "build/tetris_godot")
-tetris_sim_obj = SConscript("SConscript_TetrisSim", src_dir="../../../sim", variant_dir = "../../../host/godot/tetris_godot/build/tetris_sim")
+tetris_godot_obj = SConscript("SConscript_TetrisGodot", variant_dir = "build/tetris_godot", duplicate = 0)
+tetris_sim_obj = SConscript("SConscript_TetrisSim", src_dir="../../../sim", variant_dir = "../../../host/godot/tetris_godot/build/tetris_sim", duplicate = 0)
 
 env.Depends(tetris_godot_obj, tetris_sim_obj)
