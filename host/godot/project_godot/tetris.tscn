@@ -1,3 +1,6 @@
-[gd_scene format=3 uid="uid://rn8j1ramjyvl"]
+[gd_scene load_steps=2 format=3 uid="uid://rn8j1ramjyvl"]
 
-[node name="Tetris" type="Tetris"]
+[ext_resource type="Script" path="res://tetris.gd" id="1_spb7w"]
+
+[node name="Node" type="Node"]
+script = ExtResource("1_spb7w")

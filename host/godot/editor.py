@@ -1,0 +1,5 @@
+platform = "windows"
+use_mingw = "yes"
+use_llvm = "yes"
+compiledb = "yes"
+custom_modules = "../"
