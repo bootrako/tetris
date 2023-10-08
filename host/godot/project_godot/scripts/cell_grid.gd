@@ -1,8 +1,11 @@
 class_name CellGrid
 extends Node2D
 
+@onready var grid_size: Vector2 = Vector2.ZERO
+@onready var cell_size: Vector2 = Vector2.ZERO
+
 @export var cell_scene: PackedScene 
-var _cells: Array
+@onready var _cells: Array = []
 
 func init(width: int, height: int):
     _cells = []
@@ -10,6 +13,8 @@ func init(width: int, height: int):
         _cells.push_back([])
         for x in width:
             _cells[y].push_back(_init_cell(x, y))
+    cell_size = _cells[0][0].texture.get_size()
+    grid_size = Vector2(_cells[0].size(), _cells.size()) * cell_size
 
 func _init_cell(x: int, y: int):
     var cell = cell_scene.instantiate() as Cell
@@ -19,8 +24,7 @@ func _init_cell(x: int, y: int):
     return cell
     
 func set_cell_active(x: int, y: int, is_active: bool):
-    var cell = _cells[y][x] as Cell
-    cell.set_active(is_active)
+    _cells[y][x].set_active(is_active)
 
 func copy_cell(dst_x: int, dst_y: int, src_x: int, src_y: int):
     var dst_cell = _cells[dst_y][dst_x] as Cell
