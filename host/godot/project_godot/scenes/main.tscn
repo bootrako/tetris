@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxhpg4epykrsx"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_hd8wi"]
+[ext_resource type="PackedScene" uid="uid://daw3x6fabers0" path="res://scenes/cell_grid.tscn" id="2_sgfjk"]
+
+[node name="main" type="Node2D"]
+script = ExtResource("1_hd8wi")
+
+[node name="camera" type="Camera2D" parent="."]
+zoom = Vector2(3, 3)
+
+[node name="matrix" parent="." instance=ExtResource("2_sgfjk")]
+
+[node name="tetronimo" parent="." instance=ExtResource("2_sgfjk")]

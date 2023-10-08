@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://dhndxnnq3bikd"]
+
+[ext_resource type="Texture2D" uid="uid://bryreg542yior" path="res://sprites/cell.png" id="1_8v0sc"]
+[ext_resource type="Script" path="res://scripts/cell.gd" id="2_ht0sy"]
+
+[node name="cell" type="Sprite2D"]
+texture_filter = 1
+texture = ExtResource("1_8v0sc")
+centered = false
+script = ExtResource("2_ht0sy")
