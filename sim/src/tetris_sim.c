@@ -195,8 +195,11 @@ int tetris_sim_get_matrix_height(const tetris_sim* sim) {
     return TETRIS_MATRIX_HEIGHT;
 }
 
-bool tetris_sim_get_matrix_value(const tetris_sim* sim, int x, int y) {
-    return tetris_matrix_get_value(&sim->ctx, &sim->matrix, x, y);
+tetris_matrix_cell tetris_sim_get_matrix_cell(const tetris_sim* sim, int x, int y) {
+    tetris_matrix_cell cell;
+    cell.is_set = tetris_matrix_get_cell_value(&sim->ctx, &sim->matrix, x, y);
+    cell.shape = tetris_matrix_get_cell_shape(&sim->ctx, &sim->matrix, x, y);
+    return cell;
 }
 
 bool tetris_sim_is_tetronimo_active(const tetris_sim* sim) {
@@ -211,12 +214,20 @@ int tetris_sim_get_tetronimo_max_height(const tetris_sim* sim) {
     return TETRIS_TETRONIMO_MAX_HEIGHT;
 }
 
-bool tetris_sim_get_tetronimo_value(const tetris_sim* sim, int x, int y) {
-    return tetris_tetronimo_get_value(&sim->ctx, &sim->tetronimo, x, y);
+bool tetris_sim_get_tetronimo_cell(const tetris_sim* sim, int x, int y) {
+    return tetris_tetronimo_get_cell(&sim->ctx, &sim->tetronimo, x, y);
 }
 
-bool tetris_sim_get_next_tetronimo_value(const tetris_sim* sim, int x, int y) {
-    return tetris_tetronimo_get_value(&sim->ctx, sim->spawner.next, x, y);
+tetris_tetronimo_shape tetris_sim_get_tetronimo_shape(const tetris_sim* sim) {
+    return sim->tetronimo.shape;
+}
+
+bool tetris_sim_get_next_tetronimo_cell(const tetris_sim* sim, int x, int y) {
+    return tetris_tetronimo_get_cell(&sim->ctx, sim->spawner.next, x, y);
+}
+
+tetris_tetronimo_shape tetris_sim_get_next_tetronimo_shape(const tetris_sim* sim) {
+    return sim->spawner.next->shape;
 }
 
 int tetris_sim_get_tetronimo_pos_x(const tetris_sim* sim) {
@@ -237,18 +248,6 @@ int tetris_sim_get_lines(const tetris_sim* sim) {
 
 int tetris_sim_get_level(const tetris_sim* sim) {
     return sim->level;
-}
-
-int tetris_sim_get_statistic_count(const tetris_sim* sim) {
-    return TETRIS_ARRAY_LEN(sim->spawner.num_spawned);
-}
-
-const char* tetris_sim_get_statistic_name(const tetris_sim* sim, int index) {
-    return k_tetris_tetronimo_shape_names[index];
-}
-
-int tetris_sim_get_statistic_value(const tetris_sim* sim, int index) {
-    return sim->spawner.num_spawned[index];
 }
 
 bool tetris_sim_event_tetronimo_spawned(const tetris_sim* sim) {

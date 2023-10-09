@@ -55,8 +55,8 @@ int Tetris::get_matrix_height() const {
     return tetris_sim_get_matrix_height(sim);
 }
 
-bool Tetris::get_matrix_value(int x, int y) const {
-    return tetris_sim_get_matrix_value(sim, x, y);
+bool Tetris::get_matrix_cell(int x, int y) const {
+    return tetris_sim_get_matrix_cell(sim, x, y).is_set;
 }
 
 bool Tetris::is_tetronimo_active() const {
@@ -71,12 +71,12 @@ int Tetris::get_tetronimo_max_height() const {
     return tetris_sim_get_tetronimo_max_height(sim);
 }
 
-bool Tetris::get_tetronimo_value(int x, int y) const {
-    return tetris_sim_get_tetronimo_value(sim, x, y);
+bool Tetris::get_tetronimo_cell(int x, int y) const {
+    return tetris_sim_get_tetronimo_cell(sim, x, y);
 }
 
-bool Tetris::get_next_tetronimo_value(int x, int y) const {
-    return tetris_sim_get_next_tetronimo_value(sim, x, y);
+bool Tetris::get_next_tetronimo_cell(int x, int y) const {
+    return tetris_sim_get_next_tetronimo_cell(sim, x, y);
 }
 
 int Tetris::get_tetronimo_pos_x() const {
@@ -97,18 +97,6 @@ int Tetris::get_lines() const {
 
 int Tetris::get_level() const {
     return tetris_sim_get_level(sim);
-}
-
-int Tetris::get_statistic_count() const {
-    return tetris_sim_get_statistic_count(sim);
-}
-
-String Tetris::get_statistic_name(int index) const {
-    return tetris_sim_get_statistic_name(sim, index);
-}
-
-int Tetris::get_statistic_value(int index) const {
-    return tetris_sim_get_statistic_value(sim, index);
 }
 
 bool Tetris::event_tetronimo_spawned() const {
@@ -142,23 +130,19 @@ void Tetris::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("get_matrix_width"), &Tetris::get_matrix_width);
     ClassDB::bind_method(D_METHOD("get_matrix_height"), &Tetris::get_matrix_height);
-    ClassDB::bind_method(D_METHOD("get_matrix_value", "x", "y"), &Tetris::get_matrix_value);
+    ClassDB::bind_method(D_METHOD("get_matrix_value", "x", "y"), &Tetris::get_matrix_cell);
 
     ClassDB::bind_method(D_METHOD("is_tetronimo_active"), &Tetris::is_tetronimo_active);
     ClassDB::bind_method(D_METHOD("get_tetronimo_max_width"), &Tetris::get_tetronimo_max_width);
     ClassDB::bind_method(D_METHOD("get_tetronimo_max_height"), &Tetris::get_tetronimo_max_height);
-    ClassDB::bind_method(D_METHOD("get_tetronimo_value", "x", "y"), &Tetris::get_tetronimo_value);
-    ClassDB::bind_method(D_METHOD("get_next_tetronimo_value", "x", "y"), &Tetris::get_next_tetronimo_value);
+    ClassDB::bind_method(D_METHOD("get_tetronimo_value", "x", "y"), &Tetris::get_tetronimo_cell);
+    ClassDB::bind_method(D_METHOD("get_next_tetronimo_value", "x", "y"), &Tetris::get_next_tetronimo_cell);
     ClassDB::bind_method(D_METHOD("get_tetronimo_pos_x"), &Tetris::get_tetronimo_pos_x);
     ClassDB::bind_method(D_METHOD("get_tetronimo_pos_y"), &Tetris::get_tetronimo_pos_y);
 
     ClassDB::bind_method(D_METHOD("get_score"), &Tetris::get_score);
     ClassDB::bind_method(D_METHOD("get_lines"), &Tetris::get_lines);
     ClassDB::bind_method(D_METHOD("get_level"), &Tetris::get_level);
-
-    ClassDB::bind_method(D_METHOD("get_statistic_count"), &Tetris::get_statistic_count);
-    ClassDB::bind_method(D_METHOD("get_statistic_name", "index"), &Tetris::get_statistic_name);
-    ClassDB::bind_method(D_METHOD("get_statistic_value", "index"), &Tetris::get_statistic_value);
 
     ClassDB::bind_method(D_METHOD("event_tetronimo_spawned"), &Tetris::event_tetronimo_spawned);
     ClassDB::bind_method(D_METHOD("event_tetronimo_moved"), &Tetris::event_tetronimo_moved);

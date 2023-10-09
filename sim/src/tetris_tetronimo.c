@@ -2,16 +2,6 @@
 #include "tetris_ctx.h"
 #include "tetris_matrix.h"
 
-const char* const k_tetris_tetronimo_shape_names[TETRIS_TETRONIMO_SHAPE_COUNT] = {
-    "T", // TETRIS_TETRONIMO_SHAPE_T
-    "J", // TETRIS_TETRONIMO_SHAPE_J
-    "Z", // TETRIS_TETRONIMO_SHAPE_Z
-    "O", // TETRIS_TETRONIMO_SHAPE_I
-    "S", // TETRIS_TETRONIMO_SHAPE_S
-    "L", // TETRIS_TETRONIMO_SHAPE_L
-    "I"  // TETRIS_TETRONIMO_SHAPE_I
-};
- 
 // A            // B            // C            // D
 // . . . . 0000 // . . . . 0000 // . . . . 0000 // . . . . 0000 
 // . . . . 0000 // . . x . 0010 // . . x . 0010 // . . x . 0010
@@ -153,7 +143,7 @@ tetris_tetronimo_row tetris_tetronimo_get_row(const tetris_ctx* ctx, const tetri
     return tetronimo->rotations[tetronimo->current_rotation].rows[row];
 }
 
-bool tetris_tetronimo_get_value(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int x, const int y) {
+bool tetris_tetronimo_get_cell(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int x, const int y) {
     TETRIS_CTX_CHECK(ctx, x >= 0 && x < TETRIS_TETRONIMO_MAX_WIDTH);
     
     return (tetris_tetronimo_get_row(ctx, tetronimo, y) >> (TETRIS_TETRONIMO_MAX_WIDTH - 1 - x)) & 1;
@@ -162,15 +152,11 @@ bool tetris_tetronimo_get_value(const tetris_ctx* ctx, const tetris_tetronimo* t
 void tetris_tetronimo_spawner_init(tetris_ctx* ctx, tetris_tetronimo_spawner* spawner, const uint64_t seed) {
     tetris_rand_init(ctx, &spawner->rand, seed);
     spawner->next = &k_tetronimoes[tetris_rand_range(ctx, &spawner->rand, 0, TETRIS_ARRAY_LEN(k_tetronimoes))];
-    for (int i = 0; i < TETRIS_ARRAY_LEN(spawner->num_spawned); ++i) {
-        spawner->num_spawned[i] = 0;
-    }
 }
 
 tetris_tetronimo tetris_tetronimo_spawner_next(tetris_ctx* ctx, tetris_tetronimo_spawner* spawner) {
     tetris_tetronimo next = *spawner->next;
     TETRIS_CTX_CHECK(ctx, next.shape >= 0 && next.shape < TETRIS_TETRONIMO_SHAPE_COUNT);
-    spawner->num_spawned[next.shape]++;
 
     int next_index = tetris_rand_range(ctx, &spawner->rand, 0, TETRIS_ARRAY_LEN(k_tetronimoes));
 

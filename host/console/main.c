@@ -24,10 +24,17 @@ int main(int argc, const char** argv) {
     int* rows_cleared = (int*)malloc(sizeof(int) * tetris_sim_get_tetronimo_max_height(sim));
     int num_rows_cleared = 0;
 
+    // keep track of how many times each shape was spawned
+    int shape_stats[TETRIS_TETRONIMO_SHAPE_COUNT];
+    for (int shape = 0; shape < TETRIS_TETRONIMO_SHAPE_COUNT; ++shape) {
+        shape_stats[shape] = 0;
+    }
+    shape_stats[tetris_sim_get_tetronimo_shape(sim)]++;
+
     console_render_draw_matrix_border(render, sim);
     console_render_draw_matrix(render, sim, NULL, 0);
     console_render_draw_tetronimo(render, sim);
-    console_render_draw_ui(render, sim);
+    console_render_draw_ui(render, sim, shape_stats);
     console_render_present(render);
 
     LARGE_INTEGER counter_frequency;
@@ -60,6 +67,7 @@ int main(int argc, const char** argv) {
 
         if (tetronimo_spawned) {
             num_rows_cleared = 0;
+            shape_stats[tetris_sim_get_tetronimo_shape(sim)]++;
         }
 
         bool screen_dirty = false;
@@ -69,7 +77,7 @@ int main(int argc, const char** argv) {
             screen_dirty = true;
         }
         if (tetronimo_spawned) {
-            console_render_draw_ui(render, sim);
+            console_render_draw_ui(render, sim, shape_stats);
             screen_dirty = true;
         }
         if (screen_dirty) {
