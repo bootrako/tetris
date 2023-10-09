@@ -18,9 +18,16 @@ static tetris_matrix_row tetris_tetronimo_row_to_matrix_row(const tetris_ctx* ct
     return (shift >= 0) ? matrix_row << shift : matrix_row >> -shift;
 }
 
+static void tetris_matrix_init_cell_info(tetris_matrix_cell_info* cell_info) {
+    cell_info->shape = TETRIS_TETRONIMO_SHAPE_COUNT;
+}
+
 void tetris_matrix_init(tetris_ctx* ctx, tetris_matrix* matrix) {
     for (int row = 0; row < TETRIS_MATRIX_HEIGHT; ++row) {
         matrix->rows[row] = TETRIS_MATRIX_ROW_INIT;
+        for (int col = 0; col < TETRIS_MATRIX_WIDTH; ++col) {
+            tetris_matrix_init_cell_info(&matrix->rows_info[row][col]);
+        }
     }
 }
 
@@ -33,6 +40,18 @@ void tetris_matrix_merge(tetris_ctx* ctx, tetris_matrix* matrix, const tetris_te
         }
         if (matrix_row_index >= TETRIS_MATRIX_HEIGHT) {
             break;
+        }
+        for (int col = 0; col < TETRIS_TETRONIMO_MAX_WIDTH; ++col) {
+            const int matrix_col_index = col + tetronimo->x;
+            if (matrix_col_index < 0) {
+                continue;
+            }
+            if (matrix_col_index >= TETRIS_MATRIX_WIDTH) {
+                break;
+            }
+            if (tetris_tetronimo_get_cell(ctx, tetronimo, col, row)) {
+                matrix->rows_info[matrix_row_index][matrix_col_index].shape = tetronimo->shape;
+            }
         }
         matrix->rows[matrix_row_index] |= tetris_tetronimo_row_to_matrix_row(ctx, tetronimo, row);
         if (matrix->rows[matrix_row_index] == TETRIS_MATRIX_ROW_ALL_BITS_SET) {
@@ -69,27 +88,39 @@ bool tetris_matrix_is_tetronimo_valid(const tetris_ctx* ctx, const tetris_matrix
 int tetris_matrix_remove_cleared_lines(tetris_ctx* ctx, tetris_matrix* matrix) {
     int num_cleared_lines = 0;
 
-    const tetris_matrix_row* read = &matrix->rows[TETRIS_MATRIX_HEIGHT - 1];
-    tetris_matrix_row* write = &matrix->rows[TETRIS_MATRIX_HEIGHT - 1];
-    while (read != &matrix->rows[0]) {
-        if (*read == TETRIS_MATRIX_ROW_ALL_BITS_SET) {
+    int read_row = TETRIS_MATRIX_HEIGHT - 1;
+    int write_row = TETRIS_MATRIX_HEIGHT - 1;
+    while (read_row >= 0) {
+        if (matrix->rows[read_row] == TETRIS_MATRIX_ROW_ALL_BITS_SET) {
             num_cleared_lines++;
         } else {
-            *write = *read;
-            write--;
+            matrix->rows[write_row] = matrix->rows[read_row];
+            for (int col = 0; col < TETRIS_MATRIX_WIDTH; ++col) {
+                matrix->rows_info[write_row][col] = matrix->rows_info[read_row][col];
+            }
+            write_row--;
         }
-        read--;
+        read_row--;
     }
-    while (write != &matrix->rows[0]) {
-        *write = TETRIS_MATRIX_ROW_INIT;
-        write--;
+    while (write_row >= 0) {
+        matrix->rows[write_row] = TETRIS_MATRIX_ROW_INIT;
+        for (int col = 0; col < TETRIS_MATRIX_WIDTH; ++col) {
+            tetris_matrix_init_cell_info(&matrix->rows_info[write_row][col]);
+        }
+        write_row--;
     }
 
     return num_cleared_lines;
 }
 
-bool tetris_matrix_get_value(const tetris_ctx* ctx, const tetris_matrix* matrix, const int x, const int y) {
+bool tetris_matrix_get_cell_value(const tetris_ctx* ctx, const tetris_matrix* matrix, const int x, const int y) {
     TETRIS_CTX_CHECK(ctx, x >= 0 && x < TETRIS_MATRIX_WIDTH);
     TETRIS_CTX_CHECK(ctx, y >= 0 && y < TETRIS_MATRIX_HEIGHT);
     return (matrix->rows[y] >> (TETRIS_MATRIX_ROW_BIT_LENGTH - TETRIS_MATRIX_ROW_BIT_PADDING - 1 - x)) & 1;
+}
+
+tetris_tetronimo_shape tetris_matrix_get_cell_shape(const tetris_ctx* ctx, const tetris_matrix* matrix, const int x, const int y) {
+    TETRIS_CTX_CHECK(ctx, x >= 0 && x < TETRIS_MATRIX_WIDTH);
+    TETRIS_CTX_CHECK(ctx, y >= 0 && y < TETRIS_MATRIX_HEIGHT);
+    return matrix->rows_info[y][x].shape;
 }

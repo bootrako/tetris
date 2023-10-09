@@ -3,6 +3,7 @@
 
 #include "tetris_utils.h"
 #include <stdbool.h>
+#include <tetris_sim.h>
 
 typedef struct tetris_ctx_t tetris_ctx;
 typedef struct tetris_matrix_t tetris_matrix;
@@ -11,19 +12,6 @@ typedef struct tetris_matrix_t tetris_matrix;
 #define TETRIS_TETRONIMO_MAX_WIDTH (4)
 #define TETRIS_TETRONIMO_MAX_HEIGHT (4)
 typedef uint8_t tetris_tetronimo_row;               // needs to have enough bits to hold tetronimo max width
-
-typedef enum tetris_tetronimo_shape_t {
-    TETRIS_TETRONIMO_SHAPE_T,
-    TETRIS_TETRONIMO_SHAPE_J,
-    TETRIS_TETRONIMO_SHAPE_Z,
-    TETRIS_TETRONIMO_SHAPE_O,
-    TETRIS_TETRONIMO_SHAPE_S,
-    TETRIS_TETRONIMO_SHAPE_L,
-    TETRIS_TETRONIMO_SHAPE_I,
-    TETRIS_TETRONIMO_SHAPE_COUNT,
-} tetris_tetronimo_shape;
-
-extern const char* const k_tetris_tetronimo_shape_names[TETRIS_TETRONIMO_SHAPE_COUNT];
 
 typedef struct tetris_tetronimo_rotation_t {
     tetris_tetronimo_row rows[TETRIS_TETRONIMO_MAX_HEIGHT];
@@ -42,7 +30,6 @@ typedef struct tetris_tetronimo_t {
 typedef struct {
     tetris_rand rand;                               // random number generator
     const tetris_tetronimo* next;                   // the next tetronimo that will be spawned
-    int num_spawned[TETRIS_TETRONIMO_SHAPE_COUNT];  // number of tetronimos spawned per shape
 } tetris_tetronimo_spawner;
 
 // attempts to create a new tetronimo using the spawner and returns whether the creation was successful
@@ -58,7 +45,7 @@ void tetris_tetronimo_rotate(tetris_ctx* ctx, tetris_tetronimo* tetronimo, const
 tetris_tetronimo_row tetris_tetronimo_get_row(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int row);
 
 // given an x and y in tetronimo coordinates, returns true if the bit is set in the tetronimo, based on its current rotation
-bool tetris_tetronimo_get_value(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int x, const int y);
+bool tetris_tetronimo_get_cell(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int x, const int y);
 
 // initializes a tetronimo spawner with a seed for the RNG.
 void tetris_tetronimo_spawner_init(tetris_ctx* ctx, tetris_tetronimo_spawner* spawner, const uint64_t seed);

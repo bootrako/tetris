@@ -9,20 +9,63 @@
 #define CONSOLE_MATRIX_CLEAR_CHAR ('o')
 #define CONSOLE_TETRONIMO_SET_CHAR ('x')
 
+typedef enum console_render_color_t {
+    CONSOLE_RENDER_COLOR_BACKGROUND,
+    CONSOLE_RENDER_COLOR_FOREGROUND,
+    CONSOLE_RENDER_COLOR_TETRONIMO_START, 
+    CONSOLE_RENDER_COLOR_TETRONIMO_T = CONSOLE_RENDER_COLOR_TETRONIMO_START,
+    CONSOLE_RENDER_COLOR_TETRONIMO_J,
+    CONSOLE_RENDER_COLOR_TETRONIMO_Z,
+    CONSOLE_RENDER_COLOR_TETRONIMO_O,
+    CONSOLE_RENDER_COLOR_TETRONIMO_S,
+    CONSOLE_RENDER_COLOR_TETRONIMO_L,
+    CONSOLE_RENDER_COLOR_TETRONIMO_I,
+    CONSOLE_RENDER_COLOR_ROW_CLEARED,
+} console_render_color;
+
 console_render* console_render_init() {
     console_render* render = (console_render*)malloc(sizeof(console_render));
 
     render->console_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
     SetConsoleActiveScreenBuffer(render->console_handle);
 
-    CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
-    GetConsoleScreenBufferInfo(render->console_handle, &screen_buffer_info);
+    CONSOLE_CURSOR_INFO cursor_info;
+    cursor_info.dwSize = 100;
+    cursor_info.bVisible = FALSE;
+    SetConsoleCursorInfo(render->console_handle, &cursor_info);
+
+    CONSOLE_SCREEN_BUFFER_INFOEX screen_buffer_info;
+    screen_buffer_info.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+    GetConsoleScreenBufferInfoEx(render->console_handle, &screen_buffer_info);
+
+    const COLORREF BLACK = RGB(0, 0, 0);
+    const COLORREF WHITE = RGB(200, 200, 200);
+    const COLORREF SHAPE_COLOR_0 = RGB(215, 150, 215);
+    const COLORREF SHAPE_COLOR_1 = RGB(215, 100, 215);
+    const COLORREF SHAPE_COLOR_2 = RGB(215, 50, 215);
+    const COLORREF ROW_CLEARED_COLOR = RGB(215, 0, 215);
+
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_BACKGROUND] = BLACK;
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_FOREGROUND] = WHITE;
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_TETRONIMO_T] = SHAPE_COLOR_0;
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_TETRONIMO_J] = SHAPE_COLOR_1;
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_TETRONIMO_Z] = SHAPE_COLOR_2;
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_TETRONIMO_O] = SHAPE_COLOR_0;
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_TETRONIMO_S] = SHAPE_COLOR_1;
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_TETRONIMO_L] = SHAPE_COLOR_2;
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_TETRONIMO_I] = SHAPE_COLOR_0;
+    screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_ROW_CLEARED] = ROW_CLEARED_COLOR;
+    SetConsoleScreenBufferInfoEx(render->console_handle, &screen_buffer_info);
 
     render->screen_width = screen_buffer_info.dwSize.X;
     render->screen_height = screen_buffer_info.dwSize.Y;
 
-    render->screen = (char*)malloc(render->screen_width * render->screen_height);
-    memset(render->screen, 0, render->screen_width * render->screen_height);
+    render->screen = (char*)malloc(sizeof(char) * render->screen_width * render->screen_height);
+    render->screen_attributes = (WORD*)malloc(sizeof(WORD) * render->screen_width * render->screen_height);
+    for (int screen_index = 0; screen_index < render->screen_width * render->screen_height; ++screen_index) {
+        render->screen[screen_index] = ' ';
+        render->screen_attributes[screen_index] = CONSOLE_RENDER_COLOR_FOREGROUND;
+    }
 
     return render;
 }
@@ -58,20 +101,26 @@ void console_render_draw_matrix(console_render* render, const tetris_sim* sim, c
     const int matrix_height = tetris_sim_get_matrix_height(sim);
 
     for (int y = 0; y < matrix_height; ++y) {
-        // clear the existing line
-        memset(render->screen + ((y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + CONSOLE_SIM_DRAW_X_PADDING), 0, matrix_width);
-
-        // draw the updated line
         for (int x = 0; x < matrix_width; ++x) {
-            if (tetris_sim_get_matrix_value(sim, x, y)) {
-                render->screen[(y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + x + CONSOLE_SIM_DRAW_X_PADDING] = CONSOLE_MATRIX_SET_CHAR;
+            tetris_matrix_cell cell = tetris_sim_get_matrix_cell(sim, x, y);
+            const int screen_index = (y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + x + CONSOLE_SIM_DRAW_X_PADDING;
+            if (cell.is_set) {
+                render->screen[screen_index] = CONSOLE_MATRIX_SET_CHAR;
+                render->screen_attributes[screen_index] = CONSOLE_RENDER_COLOR_TETRONIMO_START + cell.shape;
+            } else {
+                render->screen[screen_index] = ' ';
+                render->screen_attributes[screen_index] = CONSOLE_RENDER_COLOR_FOREGROUND;
             }
         }
     }
 
     // draw over the cleared lines with a special char
     for (int row = 0; row < num_rows_cleared; ++row) {
-        memset(render->screen + ((rows_cleared[row] + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + CONSOLE_SIM_DRAW_X_PADDING), CONSOLE_MATRIX_CLEAR_CHAR, matrix_width);
+        for (int x = 0; x < matrix_width; ++x) {
+            const int screen_index = (rows_cleared[row] + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + x + CONSOLE_SIM_DRAW_X_PADDING;
+            render->screen[screen_index] = CONSOLE_MATRIX_CLEAR_CHAR;
+            render->screen_attributes[screen_index] = CONSOLE_RENDER_COLOR_ROW_CLEARED;
+        }
     }
 }
 
@@ -79,6 +128,7 @@ void console_render_draw_tetronimo(console_render* render, const tetris_sim* sim
     if (!tetris_sim_is_tetronimo_active(sim)) {
         return;
     }
+    const tetris_tetronimo_shape shape = tetris_sim_get_tetronimo_shape(sim);
     const int tetronimo_max_width = tetris_sim_get_tetronimo_max_width(sim);
     const int tetronimo_max_height = tetris_sim_get_tetronimo_max_height(sim);
     const int pos_x = tetris_sim_get_tetronimo_pos_x(sim);
@@ -88,14 +138,16 @@ void console_render_draw_tetronimo(console_render* render, const tetris_sim* sim
             continue;
         }
         for (int tetronimo_x = 0; tetronimo_x < tetronimo_max_width; ++tetronimo_x) {
-            if (tetris_sim_get_tetronimo_value(sim, tetronimo_x, tetronimo_y)) {
-                render->screen[(pos_y + tetronimo_y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + (pos_x + tetronimo_x + CONSOLE_SIM_DRAW_X_PADDING)] = CONSOLE_TETRONIMO_SET_CHAR;
+            if (tetris_sim_get_tetronimo_cell(sim, tetronimo_x, tetronimo_y)) {
+                const int screen_index = (pos_y + tetronimo_y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + (pos_x + tetronimo_x + CONSOLE_SIM_DRAW_X_PADDING);
+                render->screen[screen_index] = CONSOLE_TETRONIMO_SET_CHAR;
+                render->screen_attributes[screen_index] = CONSOLE_RENDER_COLOR_TETRONIMO_START + shape;
             }
         }
     }
 }
 
-void console_render_draw_ui(console_render* render, const tetris_sim* sim) {
+void console_render_draw_ui(console_render* render, const tetris_sim* sim, const int* shape_stats) {
     const int matrix_width = tetris_sim_get_matrix_width(sim);
 
     // draw text scores
@@ -125,29 +177,38 @@ void console_render_draw_ui(console_render* render, const tetris_sim* sim) {
     const int tetronimo_y_offset = 1;
     for (int tetronimo_y = tetronimo_y_offset; tetronimo_y < tetronimo_max_height; ++tetronimo_y) {
         for (int tetronimo_x = 0; tetronimo_x < tetronimo_max_width; ++tetronimo_x) {
-            render->screen[(draw_y + tetronimo_y - tetronimo_y_offset) * render->screen_width + (draw_x + tetronimo_x)] = tetris_sim_get_next_tetronimo_value(sim, tetronimo_x, tetronimo_y) ? CONSOLE_TETRONIMO_SET_CHAR : ' ';
+            render->screen[(draw_y + tetronimo_y - tetronimo_y_offset) * render->screen_width + (draw_x + tetronimo_x)] = tetris_sim_get_next_tetronimo_cell(sim, tetronimo_x, tetronimo_y) ? CONSOLE_TETRONIMO_SET_CHAR : ' ';
         }
     }
 
     // draw statistics
-    const int statistic_count = tetris_sim_get_statistic_count(sim);
-
+    const char* const shape_names[TETRIS_TETRONIMO_SHAPE_COUNT] = {
+        "T", // TETRIS_TETRONIMO_SHAPE_T
+        "J", // TETRIS_TETRONIMO_SHAPE_J
+        "Z", // TETRIS_TETRONIMO_SHAPE_Z
+        "O", // TETRIS_TETRONIMO_SHAPE_I
+        "S", // TETRIS_TETRONIMO_SHAPE_S
+        "L", // TETRIS_TETRONIMO_SHAPE_L
+        "I"  // TETRIS_TETRONIMO_SHAPE_I
+    };
     draw_y += tetronimo_max_height + 1;
     sprintf(render->screen + (draw_y * render->screen_width + draw_x), "STATISTICS");
     draw_y += 1;
 
-    memset(render->screen + (draw_y * render->screen_width + draw_x), 0, render->screen_width - draw_x);
-    memset(render->screen + ((draw_y + 1) * render->screen_width + draw_x), 0, render->screen_width - draw_x);
-    for (int stat = 0; stat < statistic_count; ++stat) {
-        sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%s", tetris_sim_get_statistic_name(sim, stat));
+    memset(render->screen + (draw_y * render->screen_width + draw_x), ' ', render->screen_width - draw_x);
+    memset(render->screen + ((draw_y + 1) * render->screen_width + draw_x), ' ', render->screen_width - draw_x);
+    for (int shape = 0; shape < TETRIS_TETRONIMO_SHAPE_COUNT; ++shape) {
+        sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%s ", shape_names[shape]);
         draw_y += 1;
-        draw_x += sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%d", tetris_sim_get_statistic_value(sim, stat));
+        draw_x += sprintf(render->screen + (draw_y * render->screen_width + draw_x), "%d ", shape_stats[shape]);
         draw_x += 1;
         draw_y -= 1;
     }
 }
 
 void console_render_present(console_render* render) {
-    DWORD bytesWritten;
-    WriteConsoleOutputCharacter(render->console_handle, render->screen, render->screen_width * render->screen_height, (COORD){ 0, 0 }, &bytesWritten);
+    DWORD chars_written;
+    WriteConsoleOutputCharacter(render->console_handle, render->screen, render->screen_width * render->screen_height, (COORD){ 0, 0 }, &chars_written);
+    DWORD attrs_written;
+    WriteConsoleOutputAttribute(render->console_handle, render->screen_attributes, render->screen_width * render->screen_height, (COORD){ .X = 0, .Y = 0 }, &attrs_written);
 }
