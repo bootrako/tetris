@@ -195,11 +195,12 @@ int tetris_sim_get_matrix_height(const tetris_sim* sim) {
     return TETRIS_MATRIX_HEIGHT;
 }
 
-tetris_matrix_cell tetris_sim_get_matrix_cell(const tetris_sim* sim, int x, int y) {
-    tetris_matrix_cell cell;
-    cell.is_set = tetris_matrix_get_cell_value(&sim->ctx, &sim->matrix, x, y);
-    cell.shape = tetris_matrix_get_cell_shape(&sim->ctx, &sim->matrix, x, y);
-    return cell;
+bool tetris_sim_get_matrix_cell(const tetris_sim* sim, int x, int y) {
+    return tetris_matrix_get_cell_value(&sim->ctx, &sim->matrix, x, y);
+}
+
+tetris_tetronimo_shape tetris_sim_get_matrix_cell_shape(const tetris_sim* sim, int x, int y) {
+    return tetris_matrix_get_cell_shape(&sim->ctx, &sim->matrix, x, y);
 }
 
 bool tetris_sim_is_tetronimo_active(const tetris_sim* sim) {

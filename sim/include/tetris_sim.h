@@ -36,11 +36,6 @@ typedef enum tetris_tetronimo_shape_t {
     TETRIS_TETRONIMO_SHAPE_COUNT,
 } tetris_tetronimo_shape;
 
-typedef struct tetris_matrix_cell_t {
-    bool is_set;
-    tetris_tetronimo_shape shape;
-} tetris_matrix_cell;
-
 typedef struct tetris_sim tetris_sim;
 
 // initializes the simulation. internally allocates memory that can only be freed by calling deinit
@@ -64,8 +59,11 @@ int tetris_sim_get_matrix_width(const tetris_sim* sim);
 // get the height of the play field
 int tetris_sim_get_matrix_height(const tetris_sim* sim);
 
-// returns data for a cell in the play field
-tetris_matrix_cell tetris_sim_get_matrix_cell(const tetris_sim* sim, int x, int y);
+// returns true if (in matrix-space) the x and y value is an active cell
+bool tetris_sim_get_matrix_cell(const tetris_sim* sim, int x, int y);
+
+// returns the original shape for a cell on the matrix (must be set)
+tetris_tetronimo_shape tetris_sim_get_matrix_cell_shape(const tetris_sim* sim, int x, int y);
 
 // returns true if the tetronimo is active in the matrix
 bool tetris_sim_is_tetronimo_active(const tetris_sim* sim);
@@ -79,11 +77,13 @@ int tetris_sim_get_tetronimo_max_height(const tetris_sim* sim);
 // returns true if (in tetronimo-space) the x and y value is a cell on the tetronimo - this takes into account the tetronimo's current rotation
 bool tetris_sim_get_tetronimo_cell(const tetris_sim* sim, int x, int y);
 
+// returns the shape of the tetronimo
 tetris_tetronimo_shape tetris_sim_get_tetronimo_shape(const tetris_sim* sim);
 
 // returns true if (in tetronimo-space) the x and y value is a cell on the next tetronimo
 bool tetris_sim_get_next_tetronimo_cell(const tetris_sim* sim, int x, int y);
 
+// returns the shape of the next tetronimo
 tetris_tetronimo_shape tetris_sim_get_next_tetronimo_shape(const tetris_sim* sim);
 
 // returns the x position of the tetronimo in the play space. the origin is in the top left
