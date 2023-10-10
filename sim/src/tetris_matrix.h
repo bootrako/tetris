@@ -12,14 +12,11 @@ typedef struct tetris_tetronimo_t tetris_tetronimo;
 #define TETRIS_MATRIX_WIDTH 10
 #define TETRIS_MATRIX_HEIGHT 20
 typedef uint16_t tetris_matrix_row;                 // needs to have enough bits to hold matrix width
-
-typedef struct tetris_matrix_cell_info_t {
-    tetris_tetronimo_shape shape;                   // the tetronimo shape the cell came from
-} tetris_matrix_cell_info;
+typedef uint32_t tetris_matrix_shape_row;           // needs to have enough bits to hold matrix width * 3
 
 typedef struct tetris_matrix_t {
-    tetris_matrix_row rows[TETRIS_MATRIX_HEIGHT];                                   // for each row of the matrix, the central TETRIS_MATRIX_WIDTH bits represent the row's cells
-    tetris_matrix_cell_info rows_info[TETRIS_MATRIX_HEIGHT][TETRIS_MATRIX_WIDTH];   // additional info about each cell
+    tetris_matrix_row rows[TETRIS_MATRIX_HEIGHT];               // for each row of the matrix, the central TETRIS_MATRIX_WIDTH bits represent the row's cells
+    tetris_matrix_shape_row shape_rows[TETRIS_MATRIX_HEIGHT];   // the original shape for each cell
 } tetris_matrix;
 
 // initializes the matrix bits
