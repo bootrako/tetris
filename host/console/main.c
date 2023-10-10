@@ -35,6 +35,9 @@ int main(int argc, const char** argv) {
     console_render_draw_matrix(render, sim, NULL, 0);
     console_render_draw_tetronimo(render, sim);
     console_render_draw_ui(render, sim, shape_stats);
+
+    // present to each buffer so we don't have to draw matrix border again
+    console_render_present(render);
     console_render_present(render);
 
     LARGE_INTEGER counter_frequency;
@@ -70,17 +73,10 @@ int main(int argc, const char** argv) {
             shape_stats[tetris_sim_get_tetronimo_shape(sim)]++;
         }
 
-        bool screen_dirty = false;
         if (tetronimo_spawned || tetronimo_moved || num_rows_cleared != 0) {
             console_render_draw_matrix(render, sim, rows_cleared, num_rows_cleared);
             console_render_draw_tetronimo(render, sim);
-            screen_dirty = true;
-        }
-        if (tetronimo_spawned) {
             console_render_draw_ui(render, sim, shape_stats);
-            screen_dirty = true;
-        }
-        if (screen_dirty) {
             console_render_present(render);
         }
 

@@ -5,7 +5,8 @@
 #include <tetris_sim.h>
 
 typedef struct console_render_t {
-    HANDLE console_handle;
+    HANDLE cur_handle;
+    HANDLE nxt_handle;
     int screen_width;
     int screen_height;
     char* screen;
