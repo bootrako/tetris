@@ -126,11 +126,10 @@ void console_render_draw_matrix(console_render* render, const tetris_sim* sim, c
 
     for (int y = 0; y < matrix_height; ++y) {
         for (int x = 0; x < matrix_width; ++x) {
-            tetris_matrix_cell cell = tetris_sim_get_matrix_cell(sim, x, y);
             const int screen_index = (y + CONSOLE_SIM_DRAW_Y_PADDING) * render->screen_width + x + CONSOLE_SIM_DRAW_X_PADDING;
-            if (cell.is_set) {
+            if (tetris_sim_get_matrix_cell(sim, x, y)) {
                 render->screen[screen_index] = CONSOLE_MATRIX_SET_CHAR;
-                render->screen_attributes[screen_index] = CONSOLE_RENDER_COLOR_TETRONIMO_START + cell.shape;
+                render->screen_attributes[screen_index] = CONSOLE_RENDER_COLOR_TETRONIMO_START + tetris_sim_get_matrix_cell_shape(sim, x, y);
             } else {
                 render->screen[screen_index] = ' ';
                 render->screen_attributes[screen_index] = CONSOLE_RENDER_COLOR_FOREGROUND;
