@@ -124,7 +124,9 @@ void tetris_sim_update(tetris_sim* sim) {
             sim->horizontal_dir = horizontal_move_dir;
         }
 
-        if (tetris_sim_input_just_released(sim, TETRIS_INPUT_MOVE_LEFT) || tetris_sim_input_just_released(sim, TETRIS_INPUT_MOVE_RIGHT)) {
+        if ((tetris_sim_input_just_released(sim, TETRIS_INPUT_MOVE_LEFT) && sim->horizontal_dir == -1) || 
+            (tetris_sim_input_just_released(sim, TETRIS_INPUT_MOVE_RIGHT) && sim->horizontal_dir == 1))
+        {
             sim->horizontal_hold = false;
         }
 
