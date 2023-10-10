@@ -194,6 +194,7 @@ void console_render_draw_ui(console_render* render, const tetris_sim* sim, const
     // draw next tetronimo
     const int tetronimo_max_width = tetris_sim_get_tetronimo_max_width(sim);
     const int tetronimo_max_height = tetris_sim_get_tetronimo_max_height(sim);
+    const tetris_tetronimo_shape next_tetronimo_shape = tetris_sim_get_next_tetronimo_shape(sim);
 
     draw_y += 2;
     sprintf(render->screen + (draw_y * render->screen_width + draw_x), "NEXT");
@@ -201,7 +202,9 @@ void console_render_draw_ui(console_render* render, const tetris_sim* sim, const
     const int tetronimo_y_offset = 1;
     for (int tetronimo_y = tetronimo_y_offset; tetronimo_y < tetronimo_max_height; ++tetronimo_y) {
         for (int tetronimo_x = 0; tetronimo_x < tetronimo_max_width; ++tetronimo_x) {
-            render->screen[(draw_y + tetronimo_y - tetronimo_y_offset) * render->screen_width + (draw_x + tetronimo_x)] = tetris_sim_get_next_tetronimo_cell(sim, tetronimo_x, tetronimo_y) ? CONSOLE_TETRONIMO_SET_CHAR : ' ';
+            const int screen_index = (draw_y + tetronimo_y - tetronimo_y_offset) * render->screen_width + (draw_x + tetronimo_x);
+            render->screen[screen_index] = tetris_sim_get_next_tetronimo_cell(sim, tetronimo_x, tetronimo_y) ? CONSOLE_TETRONIMO_SET_CHAR : ' ';
+            render->screen_attributes[screen_index] = CONSOLE_RENDER_COLOR_TETRONIMO_START + next_tetronimo_shape;
         }
     }
 
