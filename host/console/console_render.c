@@ -26,24 +26,27 @@ typedef enum console_render_color_t {
 console_render* console_render_init() {
     console_render* render = (console_render*)malloc(sizeof(console_render));
 
-    render->console_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-    SetConsoleActiveScreenBuffer(render->console_handle);
+    render->cur_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+    render->nxt_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+    
+    SetConsoleActiveScreenBuffer(render->cur_handle);
 
     CONSOLE_CURSOR_INFO cursor_info;
     cursor_info.dwSize = 100;
     cursor_info.bVisible = FALSE;
-    SetConsoleCursorInfo(render->console_handle, &cursor_info);
+    SetConsoleCursorInfo(render->cur_handle, &cursor_info);
+    SetConsoleCursorInfo(render->nxt_handle, &cursor_info);
 
     CONSOLE_SCREEN_BUFFER_INFOEX screen_buffer_info;
     screen_buffer_info.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
-    GetConsoleScreenBufferInfoEx(render->console_handle, &screen_buffer_info);
+    GetConsoleScreenBufferInfoEx(render->cur_handle, &screen_buffer_info);
 
     const COLORREF BLACK = RGB(0, 0, 0);
     const COLORREF WHITE = RGB(200, 200, 200);
     const COLORREF SHAPE_COLOR_0 = RGB(215, 150, 215);
     const COLORREF SHAPE_COLOR_1 = RGB(215, 100, 215);
     const COLORREF SHAPE_COLOR_2 = RGB(215, 50, 215);
-    const COLORREF ROW_CLEARED_COLOR = RGB(215, 0, 215);
+    const COLORREF ROW_CLEARED_COLOR = RGB(255, 185, 255);
 
     screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_BACKGROUND] = BLACK;
     screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_FOREGROUND] = WHITE;
@@ -55,7 +58,8 @@ console_render* console_render_init() {
     screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_TETRONIMO_L] = SHAPE_COLOR_2;
     screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_TETRONIMO_I] = SHAPE_COLOR_0;
     screen_buffer_info.ColorTable[CONSOLE_RENDER_COLOR_ROW_CLEARED] = ROW_CLEARED_COLOR;
-    SetConsoleScreenBufferInfoEx(render->console_handle, &screen_buffer_info);
+    SetConsoleScreenBufferInfoEx(render->cur_handle, &screen_buffer_info);
+    SetConsoleScreenBufferInfoEx(render->nxt_handle, &screen_buffer_info);
 
     render->screen_width = screen_buffer_info.dwSize.X;
     render->screen_height = screen_buffer_info.dwSize.Y;
@@ -72,7 +76,8 @@ console_render* console_render_init() {
 
 void console_render_deinit(console_render* render) {
     free(render->screen);
-    CloseHandle(render->console_handle);
+    CloseHandle(render->cur_handle);
+    CloseHandle(render->nxt_handle);
     free(render);
 }
 
@@ -207,8 +212,15 @@ void console_render_draw_ui(console_render* render, const tetris_sim* sim, const
 }
 
 void console_render_present(console_render* render) {
+    // render to back buffer
     DWORD chars_written;
-    WriteConsoleOutputCharacter(render->console_handle, render->screen, render->screen_width * render->screen_height, (COORD){ 0, 0 }, &chars_written);
+    WriteConsoleOutputCharacter(render->nxt_handle, render->screen, render->screen_width * render->screen_height, (COORD){ 0, 0 }, &chars_written);
     DWORD attrs_written;
-    WriteConsoleOutputAttribute(render->console_handle, render->screen_attributes, render->screen_width * render->screen_height, (COORD){ .X = 0, .Y = 0 }, &attrs_written);
+    WriteConsoleOutputAttribute(render->nxt_handle, render->screen_attributes, render->screen_width * render->screen_height, (COORD){ .X = 0, .Y = 0 }, &attrs_written);
+
+    // swap back buffer
+    SetConsoleActiveScreenBuffer(render->nxt_handle);
+    HANDLE tmp = render->cur_handle;
+    render->cur_handle = render->nxt_handle;
+    render->nxt_handle = tmp;
 }
