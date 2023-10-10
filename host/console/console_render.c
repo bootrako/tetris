@@ -32,7 +32,7 @@ console_render* console_render_init() {
     SetConsoleActiveScreenBuffer(render->cur_handle);
 
     CONSOLE_CURSOR_INFO cursor_info;
-    cursor_info.dwSize = 100;
+    GetConsoleCursorInfo(render->cur_handle, &cursor_info);
     cursor_info.bVisible = FALSE;
     SetConsoleCursorInfo(render->cur_handle, &cursor_info);
     SetConsoleCursorInfo(render->nxt_handle, &cursor_info);
@@ -41,6 +41,12 @@ console_render* console_render_init() {
     screen_buffer_info.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
     GetConsoleScreenBufferInfoEx(render->cur_handle, &screen_buffer_info);
 
+    // cache the colors for when we exit the program
+    for (int i = 0; i < 16; ++i) {
+        render->cached_color_table[i] = screen_buffer_info.ColorTable[i];
+    }
+
+    // assign a new color palette
     const COLORREF BLACK = RGB(0, 0, 0);
     const COLORREF WHITE = RGB(200, 200, 200);
     const COLORREF SHAPE_COLOR_0 = RGB(215, 150, 215);
@@ -75,10 +81,23 @@ console_render* console_render_init() {
 }
 
 void console_render_deinit(console_render* render) {
+    free(render->screen_attributes);
     free(render->screen);
     CloseHandle(render->cur_handle);
     CloseHandle(render->nxt_handle);
+
+    // restore the original color table
+    CONSOLE_SCREEN_BUFFER_INFOEX screen_buffer_info;
+    screen_buffer_info.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+    GetConsoleScreenBufferInfoEx(GetStdHandle(STD_OUTPUT_HANDLE), &screen_buffer_info);
+    for (int i = 0; i < 16; ++i) {
+        screen_buffer_info.ColorTable[i] = render->cached_color_table[i];
+    }
+    SetConsoleScreenBufferInfoEx(GetStdHandle(STD_OUTPUT_HANDLE), &screen_buffer_info);
+
     free(render);
+
+    FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 }
 
 void console_render_draw_matrix_border(console_render* render, const tetris_sim* sim) {
