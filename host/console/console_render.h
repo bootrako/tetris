@@ -11,6 +11,7 @@ typedef struct console_render_t {
     int screen_height;
     char* screen;
     WORD* screen_attributes;
+    COLORREF cached_color_table[16];
 } console_render;
 
 console_render* console_render_init();
