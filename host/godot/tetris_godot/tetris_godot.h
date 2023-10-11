@@ -19,12 +19,15 @@ public:
     int get_matrix_width() const;
     int get_matrix_height() const;
     bool get_matrix_cell(int x, int y) const;
+    int get_matrix_cell_shape(int x, int y) const;
 
     bool is_tetronimo_active() const;
     int get_tetronimo_max_width() const;
     int get_tetronimo_max_height() const;
     bool get_tetronimo_cell(int x, int y) const;
+    int get_tetronimo_shape() const;
     bool get_next_tetronimo_cell(int x, int y) const;
+    int get_next_tetronimo_shape() const;
     int get_tetronimo_pos_x() const;
     int get_tetronimo_pos_y() const;
 

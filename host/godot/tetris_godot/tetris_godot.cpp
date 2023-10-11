@@ -56,7 +56,11 @@ int Tetris::get_matrix_height() const {
 }
 
 bool Tetris::get_matrix_cell(int x, int y) const {
-    return tetris_sim_get_matrix_cell(sim, x, y).is_set;
+    return tetris_sim_get_matrix_cell(sim, x, y);
+}
+
+int Tetris::get_matrix_cell_shape(int x, int y) const {
+    return tetris_sim_get_matrix_cell_shape(sim, x, y);
 }
 
 bool Tetris::is_tetronimo_active() const {
@@ -75,8 +79,16 @@ bool Tetris::get_tetronimo_cell(int x, int y) const {
     return tetris_sim_get_tetronimo_cell(sim, x, y);
 }
 
+int Tetris::get_tetronimo_shape() const {
+    return tetris_sim_get_tetronimo_shape(sim);
+}
+
 bool Tetris::get_next_tetronimo_cell(int x, int y) const {
     return tetris_sim_get_next_tetronimo_cell(sim, x, y);
+}
+
+int Tetris::get_next_tetronimo_shape() const {
+    return tetris_sim_get_next_tetronimo_shape(sim);
 }
 
 int Tetris::get_tetronimo_pos_x() const {
@@ -130,13 +142,16 @@ void Tetris::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("get_matrix_width"), &Tetris::get_matrix_width);
     ClassDB::bind_method(D_METHOD("get_matrix_height"), &Tetris::get_matrix_height);
-    ClassDB::bind_method(D_METHOD("get_matrix_value", "x", "y"), &Tetris::get_matrix_cell);
+    ClassDB::bind_method(D_METHOD("get_matrix_cell", "x", "y"), &Tetris::get_matrix_cell);
+    ClassDB::bind_method(D_METHOD("get_matrix_cell_shape", "x", "y"), &Tetris::get_matrix_cell_shape);
 
     ClassDB::bind_method(D_METHOD("is_tetronimo_active"), &Tetris::is_tetronimo_active);
     ClassDB::bind_method(D_METHOD("get_tetronimo_max_width"), &Tetris::get_tetronimo_max_width);
     ClassDB::bind_method(D_METHOD("get_tetronimo_max_height"), &Tetris::get_tetronimo_max_height);
-    ClassDB::bind_method(D_METHOD("get_tetronimo_value", "x", "y"), &Tetris::get_tetronimo_cell);
-    ClassDB::bind_method(D_METHOD("get_next_tetronimo_value", "x", "y"), &Tetris::get_next_tetronimo_cell);
+    ClassDB::bind_method(D_METHOD("get_tetronimo_cell", "x", "y"), &Tetris::get_tetronimo_cell);
+    ClassDB::bind_method(D_METHOD("get_tetronimo_shape"), &Tetris::get_tetronimo_shape);
+    ClassDB::bind_method(D_METHOD("get_next_tetronimo_cell", "x", "y"), &Tetris::get_next_tetronimo_cell);
+    ClassDB::bind_method(D_METHOD("get_next_tetronimo_shape"), &Tetris::get_next_tetronimo_shape);
     ClassDB::bind_method(D_METHOD("get_tetronimo_pos_x"), &Tetris::get_tetronimo_pos_x);
     ClassDB::bind_method(D_METHOD("get_tetronimo_pos_y"), &Tetris::get_tetronimo_pos_y);
 

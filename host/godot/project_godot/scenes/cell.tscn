@@ -7,4 +7,5 @@
 texture_filter = 1
 texture = ExtResource("1_8v0sc")
 centered = false
+hframes = 2
 script = ExtResource("2_ht0sy")
