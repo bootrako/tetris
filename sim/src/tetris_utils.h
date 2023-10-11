@@ -22,4 +22,13 @@ uint32_t tetris_rand_next(tetris_ctx* ctx, tetris_rand* rand);
 // returns a random number between min and max
 int tetris_rand_range(tetris_ctx* ctx, tetris_rand* rand, const int min, const int max);
 
+#define TETRIS_BITSIZE(type) (sizeof(type) << 3)
+
+#ifdef __GNUC__
+    #define TETRIS_CLZ(x) __builtin_clz(x)
+    #define TETRIS_CTZ(x) __builtin_ctz(x)
+#else
+#error unsupported compiler
+#endif
+
 #endif // TETRIS_UTILS_H

@@ -2,7 +2,7 @@
 #include "tetris_ctx.h"
 #include "tetris_tetronimo.h"
 
-#define TETRIS_MATRIX_ROW_BIT_LENGTH (sizeof(tetris_matrix_row) * 8)
+#define TETRIS_MATRIX_ROW_BIT_LENGTH (TETRIS_BITSIZE(tetris_matrix_row))
 #define TETRIS_MATRIX_ROW_BIT_PADDING ((TETRIS_MATRIX_ROW_BIT_LENGTH - TETRIS_MATRIX_WIDTH) / 2)
 #define TETRIS_MATRIX_ROW_ALL_BITS_SET ((tetris_matrix_row)(-1))
 
@@ -12,7 +12,7 @@
 #define TETRIS_MATRIX_ROW_INIT (~((TETRIS_MATRIX_ROW_ALL_BITS_SET >> TETRIS_MATRIX_ROW_BIT_PADDING) & ~(TETRIS_MATRIX_ROW_ALL_BITS_SET >> (TETRIS_MATRIX_ROW_BIT_LENGTH - TETRIS_MATRIX_ROW_BIT_PADDING))))
 
 #define TETRIS_MATRIX_SHAPE_ROW_BITS_PER_SHAPE (3)
-#define TETRIS_MATRIX_SHAPE_ROW_BIT_LENGTH (sizeof(tetris_matrix_shape_row) * 8)
+#define TETRIS_MATRIX_SHAPE_ROW_BIT_LENGTH (TETRIS_BITSIZE(tetris_matrix_shape_row))
 #define TETRIS_MATRIX_SHAPE_ROW_BIT_PADDING (TETRIS_MATRIX_SHAPE_ROW_BIT_LENGTH - (TETRIS_MATRIX_SHAPE_ROW_BITS_PER_SHAPE * TETRIS_MATRIX_WIDTH))
 #define TETRIS_MATRIX_SHAPE_ROW_ALL_BITS_SET ((tetris_matrix_shape_row)(-1))
 #define TETRIS_MATRIX_SHAPE_ROW_CELL_MASK (TETRIS_MATRIX_SHAPE_ROW_ALL_BITS_SET >> (TETRIS_MATRIX_SHAPE_ROW_BIT_LENGTH - TETRIS_MATRIX_SHAPE_ROW_BITS_PER_SHAPE))
@@ -26,20 +26,9 @@ static tetris_matrix_row tetris_tetronimo_row_to_matrix_row(const tetris_ctx* ct
 }
 
 static tetris_matrix_shape_row tetris_tetronimo_row_to_matrix_shape_row(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int row) {
-    tetris_matrix_row matrix_row = tetris_tetronimo_row_to_matrix_row(ctx, tetronimo, row);
-    int bit_start = 0;
-    while (matrix_row != 0) {
-        if (matrix_row & 1) {
-            break;
-        }
-        bit_start++;
-        matrix_row >>= 1;
-    }
-    int bit_count = 0;
-    while (matrix_row != 0) {
-        bit_count++;
-        matrix_row >>= 1;
-    }
+    const unsigned int matrix_row = (unsigned int)tetris_tetronimo_row_to_matrix_row(ctx, tetronimo, row);
+    const int bit_start = TETRIS_CTZ(matrix_row);
+    const int bit_count = (TETRIS_BITSIZE(unsigned int)) - TETRIS_CLZ(matrix_row) - bit_start;
     
     tetris_matrix_shape_row shape_row = 0;
     if (bit_count > 0) {
