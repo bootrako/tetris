@@ -7,25 +7,25 @@ extends Node2D
 @export var cell_scene: PackedScene 
 @onready var _cells: Array = []
 
-func init(width: int, height: int, init_visible: bool = true, init_color_index: Cell.ColorIndex = Cell.ColorIndex.BACKGROUND):
-    var cell = cell_scene.instantiate() as Cell
+func init(width: int, height: int) -> void:
+    var cell := cell_scene.instantiate() as Cell
     cell_size = cell.texture.get_size() / Vector2(cell.hframes, cell.vframes)
     
     _cells = []
     for y in height:
-        _cells.push_back([])
+        var cell_row := [] as Array[Cell]
         for x in width:
-            _cells[y].push_back(_init_cell(x, y, init_visible, init_color_index))
-            
-    grid_size = Vector2(_cells[0].size(), _cells.size()) * cell_size    
+            cell_row.push_back(_init_cell(x, y))
+        _cells.push_back(cell_row)
+    
+    var cell_row := _cells[0] as Array[Cell]
+    grid_size = Vector2(cell_row.size(), _cells.size()) * cell_size    
 
-func _init_cell(x: int, y: int, init_visible: bool, init_color_index: Cell.ColorIndex):
-    var cell = cell_scene.instantiate() as Cell
-    add_child(cell)
+func _init_cell(x: int, y: int) -> Cell:
+    var cell := cell_scene.instantiate() as Cell
     cell.position = Vector2(x, y) * cell_size
-    cell.visible = init_visible
-    cell.set_color_index(init_color_index)
+    add_child(cell)
     return cell
 
-func get_cell(x: int, y: int):
-    return _cells[y][x]
+func get_cell(x: int, y: int) -> Cell:
+    return _cells[y][x] as Cell
