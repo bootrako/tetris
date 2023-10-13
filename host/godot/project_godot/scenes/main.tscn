@@ -1,14 +1,195 @@
-[gd_scene load_steps=3 format=3 uid="uid://bxhpg4epykrsx"]
+[gd_scene load_steps=8 format=3 uid="uid://bxhpg4epykrsx"]
 
-[ext_resource type="Script" path="res://scripts/main.gd" id="1_hd8wi"]
-[ext_resource type="PackedScene" uid="uid://daw3x6fabers0" path="res://scenes/cell_grid.tscn" id="2_sgfjk"]
+[ext_resource type="Texture2D" uid="uid://beymmcvuscm6s" path="res://sprites/background.png" id="1_thu0o"]
+[ext_resource type="LabelSettings" uid="uid://b6opxkb75rw32" path="res://ui/ui_default.tres" id="2_eos0d"]
+[ext_resource type="LabelSettings" uid="uid://bsnisj6dm1wq" path="res://ui/ui_stat.tres" id="3_ybjrs"]
+[ext_resource type="Script" path="res://scripts/tetris.gd" id="4_rs7vc"]
+[ext_resource type="Script" path="res://scripts/matrix.gd" id="5_8rk0h"]
+[ext_resource type="PackedScene" uid="uid://dhndxnnq3bikd" path="res://scenes/cell.tscn" id="6_2fqqy"]
+[ext_resource type="Script" path="res://scripts/tetronimo.gd" id="7_egbf0"]
 
 [node name="main" type="Node2D"]
-script = ExtResource("1_hd8wi")
 
 [node name="camera" type="Camera2D" parent="."]
-zoom = Vector2(3, 3)
+position = Vector2(-8, -8)
 
-[node name="matrix" parent="." instance=ExtResource("2_sgfjk")]
+[node name="background" type="Sprite2D" parent="camera"]
+z_index = 1
+texture = ExtResource("1_thu0o")
 
-[node name="tetronimo" parent="." instance=ExtResource("2_sgfjk")]
+[node name="gui" type="Control" parent="camera/background"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -128.0
+offset_top = -112.0
+offset_right = -128.0
+offset_bottom = -112.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="type" type="Label" parent="camera/background/gui"]
+layout_mode = 2
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 72.0
+offset_bottom = 32.0
+text = "A-TYPE"
+label_settings = ExtResource("2_eos0d")
+
+[node name="stats_label" type="Label" parent="camera/background/gui"]
+layout_mode = 2
+offset_left = 29.0
+offset_top = 63.0
+offset_right = 69.0
+offset_bottom = 71.0
+text = "STATS"
+label_settings = ExtResource("2_eos0d")
+
+[node name="stats" type="VBoxContainer" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 47.0
+offset_top = 88.0
+offset_right = 71.0
+offset_bottom = 192.0
+theme_override_constants/separation = 8
+
+[node name="stat_t" type="Label" parent="camera/background/gui/stats"]
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("3_ybjrs")
+horizontal_alignment = 2
+
+[node name="stat_j" type="Label" parent="camera/background/gui/stats"]
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("3_ybjrs")
+horizontal_alignment = 2
+
+[node name="stat_z" type="Label" parent="camera/background/gui/stats"]
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("3_ybjrs")
+horizontal_alignment = 2
+
+[node name="stat_o" type="Label" parent="camera/background/gui/stats"]
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("3_ybjrs")
+horizontal_alignment = 2
+
+[node name="stat_s" type="Label" parent="camera/background/gui/stats"]
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("3_ybjrs")
+horizontal_alignment = 2
+
+[node name="stat_l" type="Label" parent="camera/background/gui/stats"]
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("3_ybjrs")
+horizontal_alignment = 2
+
+[node name="stat_i" type="Label" parent="camera/background/gui/stats"]
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("3_ybjrs")
+horizontal_alignment = 2
+
+[node name="lines_label" type="Label" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 102.0
+offset_top = 16.0
+offset_right = 150.0
+offset_bottom = 24.0
+text = "LINES-"
+label_settings = ExtResource("2_eos0d")
+horizontal_alignment = 2
+
+[node name="lines" type="Label" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 16.0
+offset_right = 176.0
+offset_bottom = 24.0
+text = "000"
+label_settings = ExtResource("2_eos0d")
+horizontal_alignment = 2
+
+[node name="top_label" type="Label" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 192.0
+offset_top = 23.0
+offset_right = 232.0
+offset_bottom = 31.0
+text = "TOP"
+label_settings = ExtResource("2_eos0d")
+
+[node name="top" type="Label" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 192.0
+offset_top = 31.0
+offset_right = 240.0
+offset_bottom = 39.0
+text = "000000"
+label_settings = ExtResource("2_eos0d")
+
+[node name="score_label" type="Label" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 192.0
+offset_top = 46.0
+offset_right = 232.0
+offset_bottom = 54.0
+text = "SCORE"
+label_settings = ExtResource("2_eos0d")
+
+[node name="score" type="Label" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 192.0
+offset_top = 54.0
+offset_right = 240.0
+offset_bottom = 62.0
+text = "000000"
+label_settings = ExtResource("2_eos0d")
+
+[node name="next_label" type="Label" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 192.0
+offset_top = 96.0
+offset_right = 224.0
+offset_bottom = 104.0
+text = "NEXT"
+label_settings = ExtResource("2_eos0d")
+
+[node name="level_label" type="Label" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 193.0
+offset_top = 152.0
+offset_right = 233.0
+offset_bottom = 160.0
+text = "LEVEL"
+label_settings = ExtResource("2_eos0d")
+
+[node name="level" type="Label" parent="camera/background/gui"]
+layout_mode = 0
+offset_left = 209.0
+offset_top = 160.0
+offset_right = 225.0
+offset_bottom = 168.0
+text = "00"
+label_settings = ExtResource("2_eos0d")
+
+[node name="tetris" type="Node2D" parent="."]
+script = ExtResource("4_rs7vc")
+
+[node name="matrix" type="Node2D" parent="." node_paths=PackedStringArray("_tetris")]
+script = ExtResource("5_8rk0h")
+_tetris = NodePath("../tetris")
+_cell_scene = ExtResource("6_2fqqy")
+
+[node name="tetronimo" type="Node2D" parent="." node_paths=PackedStringArray("_tetris", "_matrix")]
+script = ExtResource("7_egbf0")
+_tetris = NodePath("../tetris")
+_matrix = NodePath("../matrix")
+_cell_scene = ExtResource("6_2fqqy")

@@ -1,12 +1,16 @@
 class_name Cell
 extends Sprite2D
 
-enum ColorIndex { INVISIBLE, BACKGROUND, SHAPE_0, SHAPE_1, SHAPE_2 }
+enum ColorIndex { INVISIBLE, BACKGROUND, SHAPE_START, SHAPE_0 = SHAPE_START, SHAPE_1, SHAPE_2, COUNT }
+
+const _num_colors: int = ColorIndex.COUNT - ColorIndex.SHAPE_START
+var _num_levels: int
+
+func _init():
+    _num_levels = (hframes - ColorIndex.SHAPE_START) / _num_colors
 
 func set_color_index(color_index: ColorIndex, level: int) -> void:
     if color_index == ColorIndex.INVISIBLE || color_index == ColorIndex.BACKGROUND:
         frame = color_index
     else:
-        var level_index := level % 10
-        var shape_index := color_index - 1
-        frame = (level_index * 3) + shape_index + 1
+        frame = color_index + ((level % _num_levels) * _num_colors)
