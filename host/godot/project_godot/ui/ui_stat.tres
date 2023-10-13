@@ -1,0 +1,8 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://bsnisj6dm1wq"]
+
+[ext_resource type="FontFile" uid="uid://b21co122fxalw" path="res://ui/ui.ttf" id="1_jxov2"]
+
+[resource]
+font = ExtResource("1_jxov2")
+font_size = 8
+font_color = Color(0.847059, 0.156863, 0, 1)

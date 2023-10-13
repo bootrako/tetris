@@ -4,7 +4,7 @@
 #include "tetris_utils.h"
 #include <stddef.h>
 
-#define TETRIS_FAST_DROP_TIMER (3)
+#define TETRIS_FAST_DROP_TIMER (2)
 #define TETRIS_RESET_TIMER (12)
 #define TETRIS_HORIZONTAL_HOLD_DELAY (16)
 #define TETRIS_HORIZONTAL_HOLD_TIMER (6)

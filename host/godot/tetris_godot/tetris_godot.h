@@ -4,17 +4,17 @@
 #include "core/object/ref_counted.h"
 #include <tetris_sim.h>
 
-class Tetris : public RefCounted {
-    GDCLASS(Tetris, RefCounted);
+class TetrisSim : public RefCounted {
+    GDCLASS(TetrisSim, RefCounted);
 public:
-    Tetris();
-    virtual ~Tetris();
+    TetrisSim();
+    virtual ~TetrisSim();
 
-    void update_sim();
+    void update();
     void poll_input();
 
-    float get_sim_time_per_frame() const;
-    bool is_sim_game_over() const;
+    float get_time_per_frame() const;
+    bool is_game_over() const;
 
     int get_matrix_width() const;
     int get_matrix_height() const;
