@@ -21,14 +21,20 @@
 // converts a tetronimo row to a matrix row, factoring in the tetronimo's x position
 static tetris_matrix_row tetris_tetronimo_row_to_matrix_row(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int row) {
     const tetris_matrix_row matrix_row = tetris_tetronimo_get_row(ctx, tetronimo, row);
+    if (matrix_row == 0) {
+        return 0;
+    }
     const int shift = TETRIS_MATRIX_ROW_BIT_LENGTH - TETRIS_MATRIX_ROW_BIT_PADDING - TETRIS_TETRONIMO_MAX_WIDTH - tetronimo->x;
     return (shift >= 0) ? matrix_row << shift : matrix_row >> -shift;
 }
 
 static tetris_matrix_shape_row tetris_tetronimo_row_to_matrix_shape_row(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int row) {
     const unsigned int matrix_row = (unsigned int)tetris_tetronimo_row_to_matrix_row(ctx, tetronimo, row);
-    const int bit_start = TETRIS_CTZ(matrix_row);
-    const int bit_count = (TETRIS_BITSIZE(unsigned int)) - TETRIS_CLZ(matrix_row) - bit_start;
+    if (matrix_row == 0) {
+        return 0;
+    }
+    const int bit_start = tetris_ctz(matrix_row);
+    const int bit_count = (TETRIS_BITSIZE(unsigned int)) - tetris_clz(matrix_row) - bit_start;
     
     tetris_matrix_shape_row shape_row = 0;
     if (bit_count > 0) {
@@ -48,7 +54,7 @@ void tetris_matrix_init(tetris_ctx* ctx, tetris_matrix* matrix) {
     }
 }
 
-void tetris_matrix_merge(tetris_ctx* ctx, tetris_matrix* matrix, const tetris_tetronimo* tetronimo) {
+int tetris_matrix_merge(tetris_ctx* ctx, tetris_matrix* matrix, const tetris_tetronimo* tetronimo) {
     ctx->events.num_matrix_rows_cleared = 0;
     for (int row = 0; row < TETRIS_TETRONIMO_MAX_HEIGHT; ++row) {
         const int matrix_row_index = row + tetronimo->y;
@@ -65,6 +71,7 @@ void tetris_matrix_merge(tetris_ctx* ctx, tetris_matrix* matrix, const tetris_te
             ctx->events.num_matrix_rows_cleared++;
         }
     }
+    return ctx->events.num_matrix_rows_cleared;
 }
 
 bool tetris_matrix_is_tetronimo_valid(const tetris_ctx* ctx, const tetris_matrix* matrix, const tetris_tetronimo* tetronimo) {
