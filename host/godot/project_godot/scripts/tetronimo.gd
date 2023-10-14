@@ -7,10 +7,15 @@ extends CellGrid
 @onready var _tetronimo_max_width: int = _tetris.sim.get_tetronimo_max_width()
 @onready var _tetronimo_max_height: int = _tetris.sim.get_tetronimo_max_height()
 
-func _ready():
+func _ready() -> void:
     init_grid(_tetronimo_max_width, _tetronimo_max_height)
+    _process_tetronimo()
 
-func _process(_delta):
+func _process(_delta) -> void:
+    if (_tetris.tetronimo_spawned || _tetris.tetronimo_moved):
+        _process_tetronimo()
+    
+func _process_tetronimo() -> void:
     var color_index := _tetris.shape_to_color_index(_tetris.sim.get_tetronimo_shape())
     var level := _tetris.sim.get_level()
     
