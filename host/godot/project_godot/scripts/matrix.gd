@@ -9,8 +9,13 @@ extends CellGrid
 func _ready():
     init_grid(_matrix_width, _matrix_height)
     position -= grid_size / 2
+    _process_matrix()
 
 func _process(_delta):
+    if _tetris.tetronimo_spawned:
+        _process_matrix()
+
+func _process_matrix():
     var level := _tetris.sim.get_level()
     for y in _matrix_height:
         for x in _matrix_width:
