@@ -23,7 +23,7 @@ typedef struct tetris_matrix_t {
 void tetris_matrix_init(tetris_ctx* ctx, tetris_matrix* matrix);
 
 // merges a tetronimo into a matrix, so that the tetronimo's rows become part of the matrix's
-void tetris_matrix_merge(tetris_ctx* ctx, tetris_matrix* matrix, const tetris_tetronimo* tetronimo);
+int tetris_matrix_merge(tetris_ctx* ctx, tetris_matrix* matrix, const tetris_tetronimo* tetronimo);
 
 // returns false if the tetronimo is overlapping a set bit on the matrix, or if the tetronimo is out of bounds.
 bool tetris_matrix_is_tetronimo_valid(const tetris_ctx* ctx, const tetris_matrix* matrix, const tetris_tetronimo* tetronimo);

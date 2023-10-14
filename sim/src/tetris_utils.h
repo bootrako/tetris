@@ -6,6 +6,7 @@
 #define TETRIS_XSTR(str) #str
 #define TETRIS_STR(str) TETRIS_XSTR(str)
 #define TETRIS_ARRAY_LEN(array) (sizeof(array) / sizeof(array[0]))
+#define TETRIS_BITSIZE(type) (sizeof(type) << 3)
 
 typedef struct tetris_ctx_t tetris_ctx;
 
@@ -22,13 +23,7 @@ uint32_t tetris_rand_next(tetris_ctx* ctx, tetris_rand* rand);
 // returns a random number between min and max
 int tetris_rand_range(tetris_ctx* ctx, tetris_rand* rand, const int min, const int max);
 
-#define TETRIS_BITSIZE(type) (sizeof(type) << 3)
-
-#ifdef __GNUC__
-    #define TETRIS_CLZ(x) __builtin_clz(x)
-    #define TETRIS_CTZ(x) __builtin_ctz(x)
-#else
-#error unsupported compiler
-#endif
+int tetris_clz(unsigned int x);
+int tetris_ctz(unsigned int x);
 
 #endif // TETRIS_UTILS_H

@@ -1,5 +1,3 @@
 platform = "windows"
-use_mingw = "yes"
 dev_build = "yes"
-compiledb = "yes"
 custom_modules = "../"

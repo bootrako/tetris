@@ -6,6 +6,7 @@
 
 #define TETRIS_FAST_DROP_TIMER (2)
 #define TETRIS_RESET_TIMER (12)
+#define TETRIS_RESET_TIMER_ROWS_CLEARED (25)
 #define TETRIS_HORIZONTAL_HOLD_DELAY (16)
 #define TETRIS_HORIZONTAL_HOLD_TIMER (6)
 
@@ -158,8 +159,8 @@ void tetris_sim_update(tetris_sim* sim) {
 
         // tetronimo is locked
         if (!sim->tetronimo.is_active) {
-            tetris_matrix_merge(&sim->ctx, &sim->matrix, &sim->tetronimo);
-            sim->reset_timer = TETRIS_RESET_TIMER;
+            bool rows_cleared = tetris_matrix_merge(&sim->ctx, &sim->matrix, &sim->tetronimo) != 0;
+            sim->reset_timer = (rows_cleared) ? TETRIS_RESET_TIMER_ROWS_CLEARED : TETRIS_RESET_TIMER;
         } 
     } else {
         sim->reset_timer--;
