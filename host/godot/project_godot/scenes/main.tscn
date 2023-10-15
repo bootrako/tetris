@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://bxhpg4epykrsx"]
+[gd_scene load_steps=26 format=3 uid="uid://bxhpg4epykrsx"]
 
 [ext_resource type="Texture2D" uid="uid://beymmcvuscm6s" path="res://sprites/background.png" id="1_thu0o"]
 [ext_resource type="LabelSettings" uid="uid://b6opxkb75rw32" path="res://ui/default_font.tres" id="2_eos0d"]
@@ -18,8 +18,11 @@
 [ext_resource type="AudioStream" uid="uid://dfgrnlglpke5q" path="res://audio/music_3.mp3" id="15_1deqg"]
 [ext_resource type="AudioStream" uid="uid://se2g4t2vmbv1" path="res://audio/sfx_clear4.mp3" id="15_neiou"]
 [ext_resource type="AudioStream" uid="uid://cy3k4f2jp0qxx" path="res://audio/sfx_gameover.mp3" id="16_cehxu"]
+[ext_resource type="AudioStream" uid="uid://dnde6hydaf4rg" path="res://audio/music_1_fast.mp3" id="16_wfnpj"]
+[ext_resource type="AudioStream" uid="uid://vd1a1g3mn04f" path="res://audio/music_2_fast.mp3" id="17_f7g30"]
 [ext_resource type="AudioStream" uid="uid://bkcbsnva55n2d" path="res://audio/sfx_levelup.mp3" id="17_itnqb"]
 [ext_resource type="AudioStream" uid="uid://qj7efjm22wy3" path="res://audio/sfx_lock.mp3" id="18_1eix1"]
+[ext_resource type="AudioStream" uid="uid://do46qwqc2u7rr" path="res://audio/music_3_fast.mp3" id="18_6nequ"]
 [ext_resource type="AudioStream" uid="uid://d054a61o1csin" path="res://audio/sfx_move.mp3" id="19_7r8tr"]
 [ext_resource type="AudioStream" uid="uid://bvgc21bypsc1a" path="res://audio/sfx_rotate.mp3" id="20_jpcdp"]
 
@@ -45,7 +48,7 @@ position = Vector2(-8, -8)
 [node name="background" type="Sprite2D" parent="camera"]
 texture = ExtResource("1_thu0o")
 
-[node name="gui" type="Control" parent="camera/background" node_paths=PackedStringArray("_tetris", "_lines_label", "_score_label", "_level_label", "_next_tetronimo", "_stats_num", "_stats_shape", "_game_over_panel")]
+[node name="gui" type="Control" parent="camera/background" node_paths=PackedStringArray("_tetris", "_lines_label", "_top_score_label", "_score_label", "_level_label", "_next_tetronimo", "_stats_num", "_stats_shape", "_game_over_panel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -59,6 +62,7 @@ grow_vertical = 2
 script = ExtResource("2_jipj4")
 _tetris = NodePath("../../../tetris")
 _lines_label = NodePath("game/lines")
+_top_score_label = NodePath("game/top")
 _score_label = NodePath("game/score")
 _level_label = NodePath("game/level")
 _next_tetronimo = NodePath("game/next_tetronimo")
@@ -409,11 +413,13 @@ label_settings = ExtResource("2_eos0d")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="audio" type="Node2D" parent="." node_paths=PackedStringArray("_tetris", "_music", "_locked", "_clear", "_clear4", "_gameover", "_levelup", "_move", "_rotate")]
+[node name="audio" type="Node2D" parent="." node_paths=PackedStringArray("_tetris", "_music", "_music_fast", "_locked", "_clear", "_clear4", "_gameover", "_levelup", "_move", "_rotate")]
 script = ExtResource("12_lq57d")
 _tetris = NodePath("../tetris")
 _music_options = Array[AudioStream]([ExtResource("13_kvsh0"), ExtResource("14_60eqc"), ExtResource("15_1deqg")])
+_music_options_fast = Array[AudioStream]([ExtResource("16_wfnpj"), ExtResource("17_f7g30"), ExtResource("18_6nequ")])
 _music = NodePath("music")
+_music_fast = NodePath("music_fast")
 _locked = NodePath("sfx_lock")
 _clear = NodePath("sfx_clear")
 _clear4 = NodePath("sfx_clear4")
@@ -423,6 +429,9 @@ _move = NodePath("sfx_move")
 _rotate = NodePath("sfx_rotate")
 
 [node name="music" type="AudioStreamPlayer2D" parent="audio"]
+stream = ExtResource("13_kvsh0")
+
+[node name="music_fast" type="AudioStreamPlayer2D" parent="audio"]
 stream = ExtResource("13_kvsh0")
 
 [node name="sfx_clear" type="AudioStreamPlayer2D" parent="audio"]
