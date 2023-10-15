@@ -8,6 +8,7 @@ extends Control
 @export var _next_tetronimo: CellGrid
 @export var _stats_num: VBoxContainer
 @export var _stats_shape: Control
+@export var _game_over_panel: Panel
 
 @onready var _cur_level: int = _tetris.sim.get_level()
 @onready var _tetronimo_max_width: int = _tetris.sim.get_tetronimo_max_width()
@@ -37,7 +38,14 @@ func _process(_delta: float) -> void:
         if level != _cur_level:
             _set_shapes_for_stats(level)
             _cur_level = level
-
+    
+    if _tetris.sim.is_game_over() && !_game_over_panel.visible:
+        _game_over_panel.visible = true
+    
+    if _game_over_panel.visible:
+        if Input.is_action_just_pressed("restart"):
+            get_tree().reload_current_scene()
+    
 func _set_next_tetronimo(level: int) -> void:
     var shape := _tetris.sim.get_next_tetronimo_shape()
     var color_index := _tetris.shape_to_color_index(shape)

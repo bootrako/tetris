@@ -1,15 +1,16 @@
-[gd_scene load_steps=11 format=3 uid="uid://bxhpg4epykrsx"]
+[gd_scene load_steps=12 format=3 uid="uid://bxhpg4epykrsx"]
 
 [ext_resource type="Texture2D" uid="uid://beymmcvuscm6s" path="res://sprites/background.png" id="1_thu0o"]
-[ext_resource type="LabelSettings" uid="uid://b6opxkb75rw32" path="res://ui/ui_default.tres" id="2_eos0d"]
+[ext_resource type="LabelSettings" uid="uid://b6opxkb75rw32" path="res://ui/default_font.tres" id="2_eos0d"]
 [ext_resource type="Script" path="res://scripts/gui.gd" id="2_jipj4"]
-[ext_resource type="LabelSettings" uid="uid://bsnisj6dm1wq" path="res://ui/ui_stat.tres" id="3_ybjrs"]
+[ext_resource type="LabelSettings" uid="uid://bsnisj6dm1wq" path="res://ui/stat_font.tres" id="3_ybjrs"]
 [ext_resource type="PackedScene" uid="uid://g6blbqfq6cot" path="res://scenes/cell_stat.tscn" id="4_mymlb"]
 [ext_resource type="Script" path="res://scripts/tetris.gd" id="4_rs7vc"]
 [ext_resource type="Script" path="res://scripts/matrix.gd" id="5_8rk0h"]
 [ext_resource type="Script" path="res://scripts/cell_grid.gd" id="5_qbcut"]
 [ext_resource type="PackedScene" uid="uid://dhndxnnq3bikd" path="res://scenes/cell.tscn" id="6_2fqqy"]
 [ext_resource type="Script" path="res://scripts/tetronimo.gd" id="7_egbf0"]
+[ext_resource type="StyleBox" uid="uid://bvkjeoands38l" path="res://ui/menu_panel.tres" id="11_8e4v8"]
 
 [node name="main" type="Node2D"]
 
@@ -33,7 +34,7 @@ position = Vector2(-8, -8)
 [node name="background" type="Sprite2D" parent="camera"]
 texture = ExtResource("1_thu0o")
 
-[node name="gui" type="Control" parent="camera/background" node_paths=PackedStringArray("_tetris", "_lines_label", "_score_label", "_level_label", "_next_tetronimo", "_stats_num", "_stats_shape")]
+[node name="gui" type="Control" parent="camera/background" node_paths=PackedStringArray("_tetris", "_lines_label", "_score_label", "_level_label", "_next_tetronimo", "_stats_num", "_stats_shape", "_game_over_panel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,14 +47,23 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_jipj4")
 _tetris = NodePath("../../../tetris")
-_lines_label = NodePath("lines")
-_score_label = NodePath("score")
-_level_label = NodePath("level")
-_next_tetronimo = NodePath("next_tetronimo")
-_stats_num = NodePath("stats_num")
-_stats_shape = NodePath("stats_shape")
+_lines_label = NodePath("game/lines")
+_score_label = NodePath("game/score")
+_level_label = NodePath("game/level")
+_next_tetronimo = NodePath("game/next_tetronimo")
+_stats_num = NodePath("game/stats_num")
+_stats_shape = NodePath("game/stats_shape")
+_game_over_panel = NodePath("menu/game_over")
 
-[node name="type" type="Label" parent="camera/background/gui"]
+[node name="game" type="Control" parent="camera/background/gui"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="type" type="Label" parent="camera/background/gui/game"]
 layout_mode = 2
 offset_left = 24.0
 offset_top = 24.0
@@ -62,7 +72,7 @@ offset_bottom = 32.0
 text = "A-TYPE"
 label_settings = ExtResource("2_eos0d")
 
-[node name="stats_header" type="Label" parent="camera/background/gui"]
+[node name="stats_header" type="Label" parent="camera/background/gui/game"]
 layout_mode = 2
 offset_left = 29.0
 offset_top = 63.0
@@ -71,7 +81,7 @@ offset_bottom = 71.0
 text = "STATS"
 label_settings = ExtResource("2_eos0d")
 
-[node name="stats_shape" type="Control" parent="camera/background/gui"]
+[node name="stats_shape" type="Control" parent="camera/background/gui/game"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -79,121 +89,121 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="stat_t" type="Node2D" parent="camera/background/gui/stats_shape"]
+[node name="stat_t" type="Node2D" parent="camera/background/gui/game/stats_shape"]
 position = Vector2(33, 89)
 
-[node name="0" parent="camera/background/gui/stats_shape/stat_t" instance=ExtResource("4_mymlb")]
+[node name="0" parent="camera/background/gui/game/stats_shape/stat_t" instance=ExtResource("4_mymlb")]
 position = Vector2(-6, 0)
 
-[node name="1" parent="camera/background/gui/stats_shape/stat_t" instance=ExtResource("4_mymlb")]
+[node name="1" parent="camera/background/gui/game/stats_shape/stat_t" instance=ExtResource("4_mymlb")]
 
-[node name="2" parent="camera/background/gui/stats_shape/stat_t" instance=ExtResource("4_mymlb")]
+[node name="2" parent="camera/background/gui/game/stats_shape/stat_t" instance=ExtResource("4_mymlb")]
 position = Vector2(6, 0)
 
-[node name="3" parent="camera/background/gui/stats_shape/stat_t" instance=ExtResource("4_mymlb")]
+[node name="3" parent="camera/background/gui/game/stats_shape/stat_t" instance=ExtResource("4_mymlb")]
 position = Vector2(0, 6)
 
-[node name="stat_j" type="Node2D" parent="camera/background/gui/stats_shape"]
+[node name="stat_j" type="Node2D" parent="camera/background/gui/game/stats_shape"]
 position = Vector2(33, 105)
 
-[node name="0" parent="camera/background/gui/stats_shape/stat_j" instance=ExtResource("4_mymlb")]
+[node name="0" parent="camera/background/gui/game/stats_shape/stat_j" instance=ExtResource("4_mymlb")]
 position = Vector2(-6, 0)
 frame = 2
 
-[node name="1" parent="camera/background/gui/stats_shape/stat_j" instance=ExtResource("4_mymlb")]
+[node name="1" parent="camera/background/gui/game/stats_shape/stat_j" instance=ExtResource("4_mymlb")]
 frame = 2
 
-[node name="2" parent="camera/background/gui/stats_shape/stat_j" instance=ExtResource("4_mymlb")]
+[node name="2" parent="camera/background/gui/game/stats_shape/stat_j" instance=ExtResource("4_mymlb")]
 position = Vector2(6, 0)
 frame = 2
 
-[node name="3" parent="camera/background/gui/stats_shape/stat_j" instance=ExtResource("4_mymlb")]
+[node name="3" parent="camera/background/gui/game/stats_shape/stat_j" instance=ExtResource("4_mymlb")]
 position = Vector2(6, 6)
 frame = 2
 
-[node name="stat_z" type="Node2D" parent="camera/background/gui/stats_shape"]
+[node name="stat_z" type="Node2D" parent="camera/background/gui/game/stats_shape"]
 position = Vector2(33, 121)
 
-[node name="0" parent="camera/background/gui/stats_shape/stat_z" instance=ExtResource("4_mymlb")]
+[node name="0" parent="camera/background/gui/game/stats_shape/stat_z" instance=ExtResource("4_mymlb")]
 position = Vector2(-6, 0)
 frame = 1
 
-[node name="1" parent="camera/background/gui/stats_shape/stat_z" instance=ExtResource("4_mymlb")]
+[node name="1" parent="camera/background/gui/game/stats_shape/stat_z" instance=ExtResource("4_mymlb")]
 frame = 1
 
-[node name="2" parent="camera/background/gui/stats_shape/stat_z" instance=ExtResource("4_mymlb")]
+[node name="2" parent="camera/background/gui/game/stats_shape/stat_z" instance=ExtResource("4_mymlb")]
 position = Vector2(0, 6)
 frame = 1
 
-[node name="3" parent="camera/background/gui/stats_shape/stat_z" instance=ExtResource("4_mymlb")]
+[node name="3" parent="camera/background/gui/game/stats_shape/stat_z" instance=ExtResource("4_mymlb")]
 position = Vector2(6, 6)
 frame = 1
 
-[node name="stat_o" type="Node2D" parent="camera/background/gui/stats_shape"]
+[node name="stat_o" type="Node2D" parent="camera/background/gui/game/stats_shape"]
 position = Vector2(30, 137)
 
-[node name="0" parent="camera/background/gui/stats_shape/stat_o" instance=ExtResource("4_mymlb")]
+[node name="0" parent="camera/background/gui/game/stats_shape/stat_o" instance=ExtResource("4_mymlb")]
 
-[node name="1" parent="camera/background/gui/stats_shape/stat_o" instance=ExtResource("4_mymlb")]
+[node name="1" parent="camera/background/gui/game/stats_shape/stat_o" instance=ExtResource("4_mymlb")]
 position = Vector2(6, 0)
 
-[node name="2" parent="camera/background/gui/stats_shape/stat_o" instance=ExtResource("4_mymlb")]
+[node name="2" parent="camera/background/gui/game/stats_shape/stat_o" instance=ExtResource("4_mymlb")]
 position = Vector2(0, 6)
 
-[node name="3" parent="camera/background/gui/stats_shape/stat_o" instance=ExtResource("4_mymlb")]
+[node name="3" parent="camera/background/gui/game/stats_shape/stat_o" instance=ExtResource("4_mymlb")]
 position = Vector2(6, 6)
 
-[node name="stat_s" type="Node2D" parent="camera/background/gui/stats_shape"]
+[node name="stat_s" type="Node2D" parent="camera/background/gui/game/stats_shape"]
 position = Vector2(33, 153)
 
-[node name="0" parent="camera/background/gui/stats_shape/stat_s" instance=ExtResource("4_mymlb")]
+[node name="0" parent="camera/background/gui/game/stats_shape/stat_s" instance=ExtResource("4_mymlb")]
 frame = 2
 
-[node name="1" parent="camera/background/gui/stats_shape/stat_s" instance=ExtResource("4_mymlb")]
+[node name="1" parent="camera/background/gui/game/stats_shape/stat_s" instance=ExtResource("4_mymlb")]
 position = Vector2(6, 0)
 frame = 2
 
-[node name="2" parent="camera/background/gui/stats_shape/stat_s" instance=ExtResource("4_mymlb")]
+[node name="2" parent="camera/background/gui/game/stats_shape/stat_s" instance=ExtResource("4_mymlb")]
 position = Vector2(-6, 6)
 frame = 2
 
-[node name="3" parent="camera/background/gui/stats_shape/stat_s" instance=ExtResource("4_mymlb")]
+[node name="3" parent="camera/background/gui/game/stats_shape/stat_s" instance=ExtResource("4_mymlb")]
 position = Vector2(0, 6)
 frame = 2
 
-[node name="stat_l" type="Node2D" parent="camera/background/gui/stats_shape"]
+[node name="stat_l" type="Node2D" parent="camera/background/gui/game/stats_shape"]
 position = Vector2(33, 169)
 
-[node name="0" parent="camera/background/gui/stats_shape/stat_l" instance=ExtResource("4_mymlb")]
+[node name="0" parent="camera/background/gui/game/stats_shape/stat_l" instance=ExtResource("4_mymlb")]
 position = Vector2(-6, 0)
 frame = 1
 
-[node name="1" parent="camera/background/gui/stats_shape/stat_l" instance=ExtResource("4_mymlb")]
+[node name="1" parent="camera/background/gui/game/stats_shape/stat_l" instance=ExtResource("4_mymlb")]
 frame = 1
 
-[node name="2" parent="camera/background/gui/stats_shape/stat_l" instance=ExtResource("4_mymlb")]
+[node name="2" parent="camera/background/gui/game/stats_shape/stat_l" instance=ExtResource("4_mymlb")]
 position = Vector2(6, 0)
 frame = 1
 
-[node name="3" parent="camera/background/gui/stats_shape/stat_l" instance=ExtResource("4_mymlb")]
+[node name="3" parent="camera/background/gui/game/stats_shape/stat_l" instance=ExtResource("4_mymlb")]
 position = Vector2(-6, 6)
 frame = 1
 
-[node name="stat_i" type="Node2D" parent="camera/background/gui/stats_shape"]
+[node name="stat_i" type="Node2D" parent="camera/background/gui/game/stats_shape"]
 position = Vector2(30, 186)
 
-[node name="0" parent="camera/background/gui/stats_shape/stat_i" instance=ExtResource("4_mymlb")]
+[node name="0" parent="camera/background/gui/game/stats_shape/stat_i" instance=ExtResource("4_mymlb")]
 position = Vector2(-6, 0)
 
-[node name="1" parent="camera/background/gui/stats_shape/stat_i" instance=ExtResource("4_mymlb")]
+[node name="1" parent="camera/background/gui/game/stats_shape/stat_i" instance=ExtResource("4_mymlb")]
 
-[node name="2" parent="camera/background/gui/stats_shape/stat_i" instance=ExtResource("4_mymlb")]
+[node name="2" parent="camera/background/gui/game/stats_shape/stat_i" instance=ExtResource("4_mymlb")]
 position = Vector2(6, 0)
 
-[node name="3" parent="camera/background/gui/stats_shape/stat_i" instance=ExtResource("4_mymlb")]
+[node name="3" parent="camera/background/gui/game/stats_shape/stat_i" instance=ExtResource("4_mymlb")]
 position = Vector2(12, 0)
 
-[node name="stats_num" type="VBoxContainer" parent="camera/background/gui"]
+[node name="stats_num" type="VBoxContainer" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 47.0
 offset_top = 88.0
@@ -201,49 +211,49 @@ offset_right = 71.0
 offset_bottom = 192.0
 theme_override_constants/separation = 8
 
-[node name="stat_t" type="Label" parent="camera/background/gui/stats_num"]
+[node name="stat_t" type="Label" parent="camera/background/gui/game/stats_num"]
 layout_mode = 2
 text = "000"
 label_settings = ExtResource("3_ybjrs")
 horizontal_alignment = 2
 
-[node name="stat_j" type="Label" parent="camera/background/gui/stats_num"]
+[node name="stat_j" type="Label" parent="camera/background/gui/game/stats_num"]
 layout_mode = 2
 text = "000"
 label_settings = ExtResource("3_ybjrs")
 horizontal_alignment = 2
 
-[node name="stat_z" type="Label" parent="camera/background/gui/stats_num"]
+[node name="stat_z" type="Label" parent="camera/background/gui/game/stats_num"]
 layout_mode = 2
 text = "000"
 label_settings = ExtResource("3_ybjrs")
 horizontal_alignment = 2
 
-[node name="stat_o" type="Label" parent="camera/background/gui/stats_num"]
+[node name="stat_o" type="Label" parent="camera/background/gui/game/stats_num"]
 layout_mode = 2
 text = "000"
 label_settings = ExtResource("3_ybjrs")
 horizontal_alignment = 2
 
-[node name="stat_s" type="Label" parent="camera/background/gui/stats_num"]
+[node name="stat_s" type="Label" parent="camera/background/gui/game/stats_num"]
 layout_mode = 2
 text = "000"
 label_settings = ExtResource("3_ybjrs")
 horizontal_alignment = 2
 
-[node name="stat_l" type="Label" parent="camera/background/gui/stats_num"]
+[node name="stat_l" type="Label" parent="camera/background/gui/game/stats_num"]
 layout_mode = 2
 text = "000"
 label_settings = ExtResource("3_ybjrs")
 horizontal_alignment = 2
 
-[node name="stat_i" type="Label" parent="camera/background/gui/stats_num"]
+[node name="stat_i" type="Label" parent="camera/background/gui/game/stats_num"]
 layout_mode = 2
 text = "000"
 label_settings = ExtResource("3_ybjrs")
 horizontal_alignment = 2
 
-[node name="lines_header" type="Label" parent="camera/background/gui"]
+[node name="lines_header" type="Label" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 102.0
 offset_top = 16.0
@@ -253,7 +263,7 @@ text = "LINES-"
 label_settings = ExtResource("2_eos0d")
 horizontal_alignment = 2
 
-[node name="lines" type="Label" parent="camera/background/gui"]
+[node name="lines" type="Label" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 152.0
 offset_top = 16.0
@@ -263,7 +273,7 @@ text = "000"
 label_settings = ExtResource("2_eos0d")
 horizontal_alignment = 2
 
-[node name="top_header" type="Label" parent="camera/background/gui"]
+[node name="top_header" type="Label" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 192.0
 offset_top = 23.0
@@ -272,7 +282,7 @@ offset_bottom = 31.0
 text = "TOP"
 label_settings = ExtResource("2_eos0d")
 
-[node name="top" type="Label" parent="camera/background/gui"]
+[node name="top" type="Label" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 192.0
 offset_top = 31.0
@@ -281,7 +291,7 @@ offset_bottom = 39.0
 text = "010000"
 label_settings = ExtResource("2_eos0d")
 
-[node name="score_header" type="Label" parent="camera/background/gui"]
+[node name="score_header" type="Label" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 192.0
 offset_top = 46.0
@@ -290,7 +300,7 @@ offset_bottom = 54.0
 text = "SCORE"
 label_settings = ExtResource("2_eos0d")
 
-[node name="score" type="Label" parent="camera/background/gui"]
+[node name="score" type="Label" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 192.0
 offset_top = 54.0
@@ -299,7 +309,7 @@ offset_bottom = 62.0
 text = "000000"
 label_settings = ExtResource("2_eos0d")
 
-[node name="next_header" type="Label" parent="camera/background/gui"]
+[node name="next_header" type="Label" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 192.0
 offset_top = 96.0
@@ -308,12 +318,12 @@ offset_bottom = 104.0
 text = "NEXT"
 label_settings = ExtResource("2_eos0d")
 
-[node name="next_tetronimo" type="Node2D" parent="camera/background/gui"]
+[node name="next_tetronimo" type="Node2D" parent="camera/background/gui/game"]
 position = Vector2(188, 97)
 script = ExtResource("5_qbcut")
 _cell_scene = ExtResource("6_2fqqy")
 
-[node name="level_header" type="Label" parent="camera/background/gui"]
+[node name="level_header" type="Label" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 193.0
 offset_top = 152.0
@@ -322,7 +332,7 @@ offset_bottom = 160.0
 text = "LEVEL"
 label_settings = ExtResource("2_eos0d")
 
-[node name="level" type="Label" parent="camera/background/gui"]
+[node name="level" type="Label" parent="camera/background/gui/game"]
 layout_mode = 0
 offset_left = 209.0
 offset_top = 160.0
@@ -330,3 +340,60 @@ offset_right = 225.0
 offset_bottom = 168.0
 text = "00"
 label_settings = ExtResource("2_eos0d")
+
+[node name="menu" type="Control" parent="camera/background/gui"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="game_over" type="Panel" parent="camera/background/gui/menu"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -82.0
+offset_top = -22.0
+offset_right = 98.0
+offset_bottom = 38.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("11_8e4v8")
+
+[node name="game_over_header" type="Label" parent="camera/background/gui/menu/game_over"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -76.0
+offset_top = 6.0
+offset_right = 76.0
+offset_bottom = 29.0
+grow_horizontal = 2
+text = "GAME OVER!"
+label_settings = ExtResource("2_eos0d")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="instructions_header" type="Label" parent="camera/background/gui/menu/game_over"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -76.0
+offset_top = -33.0
+offset_right = 76.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Press R to restart."
+label_settings = ExtResource("2_eos0d")
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,13 +1,17 @@
 class_name Matrix
 extends CellGrid
 
+const _rows_cleared_sim_frames_per_anim_frame = 5
+
 @export var _tetris: Tetris
 
 @onready var _matrix_width: int = _tetris.sim.get_matrix_width()
 @onready var _matrix_height: int = _tetris.sim.get_matrix_height()
+@onready var _matrix_half_width: int = _matrix_width / 2
 
 @onready var _is_animating_rows_cleared: bool = false
 @onready var _rows_cleared_animation_frame: int = 0
+@onready var _rows_cleared_animation_index: int = 0
 @onready var _rows_cleared: PackedInt32Array = []
 
 func _ready() -> void:
@@ -19,6 +23,7 @@ func _process(_delta) -> void:
     if !_tetris.matrix_rows_cleared.is_empty():
         _is_animating_rows_cleared = true
         _rows_cleared_animation_frame = 0
+        _rows_cleared_animation_index = -1
         _rows_cleared = _tetris.matrix_rows_cleared
          
     if _tetris.tetronimo_locked:
@@ -43,17 +48,21 @@ func _set_matrix() -> void:
                 cell.set_color_index(Cell.ColorIndex.BACKGROUND, level)
 
 func _animate_rows_cleared() -> void:
-    var half_width := _matrix_width / 2
-    var rows_cleared_animation_index := _rows_cleared_animation_frame / 5
-    if rows_cleared_animation_index >= half_width:
+    _rows_cleared_animation_frame += _tetris.num_frames_simmed
+    var last_rows_cleared_animation_index := _rows_cleared_animation_index
+    _rows_cleared_animation_index = _rows_cleared_animation_frame / _rows_cleared_sim_frames_per_anim_frame
+    if _rows_cleared_animation_index == last_rows_cleared_animation_index:
+        return
+    
+    if _rows_cleared_animation_index >= _matrix_half_width:
         _is_animating_rows_cleared = false
-        return 
-    var l_index := half_width - 1 - rows_cleared_animation_index
-    var r_index := half_width + rows_cleared_animation_index
+        return
+         
+    var l_index := _matrix_half_width - 1 - _rows_cleared_animation_index
+    var r_index := _matrix_half_width + _rows_cleared_animation_index
     var level := _tetris.sim.get_level()
     for row in _rows_cleared:
         var l_cell := get_cell(l_index, row)
         var r_cell := get_cell(r_index, row)
         l_cell.set_color_index(Cell.ColorIndex.BACKGROUND, level)
         r_cell.set_color_index(Cell.ColorIndex.BACKGROUND, level)
-    _rows_cleared_animation_frame += _tetris.num_frames_simmed
