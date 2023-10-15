@@ -262,6 +262,10 @@ bool tetris_sim_event_tetronimo_moved(const tetris_sim* sim) {
     return sim->ctx.events.tetronimo_moved;
 }
 
+bool tetris_sim_event_tetronimo_rotated(const tetris_sim* sim) {
+    return sim->ctx.events.tetronimo_rotated;
+}
+
 bool tetris_sim_event_tetronimo_locked(const tetris_sim* sim) {
     return sim->ctx.events.tetronimo_locked;
 }

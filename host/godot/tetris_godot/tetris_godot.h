@@ -38,6 +38,7 @@ public:
     bool event_tetronimo_spawned() const;
     bool event_tetronimo_moved() const;
     bool event_tetronimo_locked() const;
+    bool event_tetronimo_rotated() const;
     Vector<int> event_matrix_rows_cleared() const;
 
 protected:

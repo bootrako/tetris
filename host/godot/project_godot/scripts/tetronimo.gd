@@ -12,7 +12,7 @@ func _ready() -> void:
     _set_tetronimo()
 
 func _process(_delta) -> void:
-    if _tetris.tetronimo_spawned || _tetris.tetronimo_moved:
+    if _tetris.tetronimo_spawned || _tetris.tetronimo_moved || _tetris.tetronimo_rotated:
         _set_tetronimo()
     if _tetris.tetronimo_locked:
         _clear_tetronimo()
