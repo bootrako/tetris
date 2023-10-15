@@ -3,6 +3,7 @@ extends Control
 
 @export var _tetris: Tetris
 @export var _lines_label: Label
+@export var _top_score_label: Label
 @export var _score_label: Label
 @export var _level_label: Label
 @export var _next_tetronimo: CellGrid
@@ -24,6 +25,7 @@ func _ready() -> void:
     _set_next_tetronimo(_cur_level)
     _set_spawned_stats()
     _set_shapes_for_stats(_cur_level)
+    _load_top_score()
 
 func _process(_delta: float) -> void:
     if _tetris.tetronimo_spawned:
@@ -40,6 +42,7 @@ func _process(_delta: float) -> void:
             _cur_level = level
     
     if _tetris.sim.is_game_over() && !_game_over_panel.visible:
+        _save_top_score()
         _game_over_panel.visible = true
     
     if _game_over_panel.visible:
@@ -78,3 +81,15 @@ func _get_next_tetronimo_offset(shape: int) -> Vector2:
         return _next_tetronimo_init_pos + Vector2(4, 0)
     else:
         return _next_tetronimo_init_pos
+
+func _load_top_score() -> void:
+    if !FileAccess.file_exists("user://top_score.save"):
+        return
+    var save_file := FileAccess.open("user://top_score.save", FileAccess.READ)
+    _top_score_label.text = save_file.get_line()
+
+func _save_top_score() -> void:
+    if _score_label.text <= _top_score_label.text:
+        return
+    var save_file := FileAccess.open("user://top_score.save", FileAccess.WRITE)
+    save_file.store_line(_score_label.text)

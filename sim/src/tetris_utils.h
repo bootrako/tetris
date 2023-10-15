@@ -23,7 +23,10 @@ uint32_t tetris_rand_next(tetris_ctx* ctx, tetris_rand* rand);
 // returns a random number between min and max
 int tetris_rand_range(tetris_ctx* ctx, tetris_rand* rand, const int min, const int max);
 
+// returns the count of leading zeroes before a the first set bit, starting at most significant
 int tetris_clz(unsigned int x);
+
+// returns the count of trailing zeroes after the last set bit, to the least significant
 int tetris_ctz(unsigned int x);
 
 #endif // TETRIS_UTILS_H

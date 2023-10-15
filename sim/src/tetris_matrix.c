@@ -28,6 +28,7 @@ static tetris_matrix_row tetris_tetronimo_row_to_matrix_row(const tetris_ctx* ct
     return (shift >= 0) ? matrix_row << shift : matrix_row >> -shift;
 }
 
+// converts a tetronimo row to a matrix shape row, factoring in the tetronimo's x position
 static tetris_matrix_shape_row tetris_tetronimo_row_to_matrix_shape_row(const tetris_ctx* ctx, const tetris_tetronimo* tetronimo, const int row) {
     const unsigned int matrix_row = (unsigned int)tetris_tetronimo_row_to_matrix_row(ctx, tetronimo, row);
     if (matrix_row == 0) {

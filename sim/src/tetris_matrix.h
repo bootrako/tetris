@@ -34,6 +34,7 @@ int tetris_matrix_remove_cleared_lines(tetris_ctx* ctx, tetris_matrix* matrix);
 // given an x and y in matrix coordinates, returns true if the bit is set in the matrix
 bool tetris_matrix_get_cell_value(const tetris_ctx* ctx, const tetris_matrix* matrix, const int x, const int y);
 
+// given an x and y in matrix coordinates, returns the shape of the tetronimo that originally set this cell
 tetris_tetronimo_shape tetris_matrix_get_cell_shape(const tetris_ctx* ctx, const tetris_matrix* matrix, const int x, const int y);
 
 #endif // TETRIS_MATRIX_H
