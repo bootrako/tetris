@@ -130,7 +130,7 @@ void tetris_tetronimo_rotate(tetris_ctx* ctx, tetris_tetronimo* tetronimo, const
     tetronimo->current_rotation = (tetronimo->current_rotation + dir_rot + tetronimo->num_rotations) % tetronimo->num_rotations;
     const bool rotate_is_valid = tetris_matrix_is_tetronimo_valid(ctx, matrix, tetronimo);
     if (rotate_is_valid) {
-        ctx->events.tetronimo_moved |= true;
+        ctx->events.tetronimo_rotated |= true;
     } else {
         tetronimo->current_rotation = prev_rotation;
     }

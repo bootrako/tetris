@@ -9,6 +9,7 @@ typedef struct tetris_events_t {
     bool tetronimo_spawned;                                 // true if the tetronimo was spawned during this frame
     bool tetronimo_moved;                                   // true if the tetronimo moved during this frame
     bool tetronimo_locked;                                  // true if the tetronimo was locked in place during this frame
+    bool tetronimo_rotated;                                 // true if the tetronimo was rotated during this frame
 } tetris_events;
 
 void tetris_events_init(tetris_events* events);

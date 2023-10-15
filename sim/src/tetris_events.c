@@ -5,4 +5,5 @@ void tetris_events_init(tetris_events* events) {
     events->tetronimo_spawned = false;
     events->tetronimo_moved = false;
     events->tetronimo_locked = false;
+    events->tetronimo_rotated = false;
 }

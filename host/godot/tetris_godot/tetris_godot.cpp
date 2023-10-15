@@ -119,6 +119,10 @@ bool TetrisSim::event_tetronimo_moved() const {
     return tetris_sim_event_tetronimo_moved(sim);
 }
 
+bool TetrisSim::event_tetronimo_rotated() const {
+    return tetris_sim_event_tetronimo_rotated(sim);
+}
+
 bool TetrisSim::event_tetronimo_locked() const {
     return tetris_sim_event_tetronimo_locked(sim);
 }
@@ -161,6 +165,7 @@ void TetrisSim::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("event_tetronimo_spawned"), &TetrisSim::event_tetronimo_spawned);
     ClassDB::bind_method(D_METHOD("event_tetronimo_moved"), &TetrisSim::event_tetronimo_moved);
+    ClassDB::bind_method(D_METHOD("event_tetronimo_rotated"), &TetrisSim::event_tetronimo_rotated);
     ClassDB::bind_method(D_METHOD("event_tetronimo_locked"), &TetrisSim::event_tetronimo_locked);
     ClassDB::bind_method(D_METHOD("event_matrix_rows_cleared"), &TetrisSim::event_matrix_rows_cleared);
 }

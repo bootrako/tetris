@@ -107,6 +107,9 @@ bool tetris_sim_event_tetronimo_spawned(const tetris_sim* sim);
 // returns true if a tetronimo was moved this frame
 bool tetris_sim_event_tetronimo_moved(const tetris_sim* sim);
 
+// returns true if a tetronimo was rotated this frame
+bool tetris_sim_event_tetronimo_rotated(const tetris_sim* sim);
+
 // returns true if a tetronimo was locked in place this frame
 bool tetris_sim_event_tetronimo_locked(const tetris_sim* sim);
 
