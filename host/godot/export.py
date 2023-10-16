@@ -1,5 +1,3 @@
-platform = "windows"
-target = "template_release"
 optimize = "size"
 debug_symbols = "no"
 disable_3d = "yes"
@@ -7,8 +5,6 @@ disable_advanced_gui = "yes"
 vulkan = "no"
 openxr = "no"
 brotli = "no"
-
-custom_modules = "../"
 
 module_astcenc_enabled = "no"
 module_basis_universal_enabled = "no"

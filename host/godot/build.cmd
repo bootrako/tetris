@@ -1,10 +1,21 @@
 @echo off
 
-if "%~1" == "" set profile_path="../editor.py"
-if "%~1" == "editor" set profile_path="../editor.py"
-if "%~1" == "editor_debug" set profile_path="../editor_debug.py"
-if "%~1" == "export" set profile_path="../export.py"
+if "%~1" == "" (
+    set args=custom_modules="../"
+)
+if "%~1" == "editor" (
+    set args=custom_modules="../"
+)
+if "%~1" == "editor_debug" (
+    set args=custom_modules="../" dev_build="yes"
+)
+if "%~1" == "export" (
+    set args=target="template_release" profile="../export.py" custom_modules="../"
+)
+if "%~1" == "export_web" (
+    set args=platform="web" target="template_release" profile="../export.py" custom_modules="../" javascript_eval="no"
+)
 
 pushd godot
-scons profile=%profile_path%
+scons %args%
 popd
