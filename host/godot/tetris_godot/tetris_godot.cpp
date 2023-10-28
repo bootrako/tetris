@@ -1,6 +1,7 @@
 #include "tetris_godot.h"
 #include "core/error/error_macros.h"
 #include "core/input/input.h"
+#include "core/input/input_map.h"
 #include "core/math/math_funcs.h"
 #include "core/os/memory.h"
 
@@ -25,8 +26,6 @@ void TetrisSim::update() {
 }
 
 void TetrisSim::poll_input() {
-    Input* input_singleton = Input::get_singleton();
-
     const char* const input_to_action[TETRIS_INPUT_COUNT] = {
         "move_left",        // TETRIS_INPUT_MOVE_LEFT
         "move_right",       // TETRIS_INPUT_MOVE_RIGHT
@@ -34,8 +33,30 @@ void TetrisSim::poll_input() {
         "rotate_left",      // TETRIS_INPUT_ROTATE_LEFT
         "rotate_right",     // TETRIS_INPUT_ROTATE_RIGHT
     };
-    for (int input = 0; input < TETRIS_INPUT_COUNT; ++input) {
-        input_pressed[input] = input_singleton->is_action_pressed(input_to_action[input]);
+
+    // https://github.com/godotengine/godot/issues/36396
+    // manually poll input events since input actions can miss a input release event
+    // this only seems to happen on web builds 
+    Input* input_singleton = Input::get_singleton();
+    InputMap* input_map = InputMap::get_singleton();
+    for (int input = 0 ; input < TETRIS_INPUT_COUNT; ++input) {
+        const List<Ref<InputEvent>>* events = input_map->action_get_events(input_to_action[input]);
+        if (!events) {
+            continue;
+        }
+
+        for (const Ref<InputEvent>& element : *events) {
+            if (!element.is_valid()) {
+                continue;
+            }
+
+            Ref<InputEventKey> key = element;
+            if (!key.is_valid()) {
+                continue;
+            }
+
+            input_pressed[input] = input_singleton->is_key_pressed(key->get_keycode());
+        }
     }
 }
 
