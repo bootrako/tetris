@@ -19,7 +19,7 @@ const _fast_music_threshold: int = 4
 @onready var _is_gameover: bool = false
 @onready var _level: int = 0
 @onready var _matrix_width: int = _tetris.sim.get_matrix_width()
-@onready var _music_index: int = randi_range(0, _music_options.size())
+@onready var _music_index: int = randi() % _music_options.size()
 @onready var _fast_music: bool = false
 
 func _ready() -> void:
