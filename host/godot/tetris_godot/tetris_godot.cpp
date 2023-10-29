@@ -40,6 +40,8 @@ void TetrisSim::poll_input() {
     Input* input_singleton = Input::get_singleton();
     InputMap* input_map = InputMap::get_singleton();
     for (int input = 0 ; input < TETRIS_INPUT_COUNT; ++input) {
+        input_pressed[input] = false;
+
         const List<Ref<InputEvent>>* events = input_map->action_get_events(input_to_action[input]);
         if (!events) {
             continue;
@@ -55,7 +57,7 @@ void TetrisSim::poll_input() {
                 continue;
             }
 
-            input_pressed[input] = input_singleton->is_key_pressed(key->get_keycode());
+            input_pressed[input] |= input_singleton->is_key_pressed(key->get_keycode());
         }
     }
 }
