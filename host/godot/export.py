@@ -4,7 +4,7 @@ disable_3d = "yes"
 disable_advanced_gui = "yes"
 vulkan = "no"
 openxr = "no"
-brotli = "no"
+# brotli = "no"
 
 module_astcenc_enabled = "no"
 module_basis_universal_enabled = "no"
