@@ -45,10 +45,6 @@ func _process(_delta: float) -> void:
         _save_top_score()
         _game_over_panel.visible = true
     
-    if _game_over_panel.visible:
-        if Input.is_action_just_pressed("restart"):
-            get_tree().reload_current_scene()
-    
 func _set_next_tetronimo(level: int) -> void:
     var shape := _tetris.sim.get_next_tetronimo_shape()
     var color_index := _tetris.shape_to_color_index(shape)

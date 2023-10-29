@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://bxhpg4epykrsx"]
+[gd_scene load_steps=27 format=3 uid="uid://bxhpg4epykrsx"]
 
 [ext_resource type="Texture2D" uid="uid://beymmcvuscm6s" path="res://sprites/background.png" id="1_thu0o"]
 [ext_resource type="LabelSettings" uid="uid://b6opxkb75rw32" path="res://ui/default_font.tres" id="2_eos0d"]
@@ -25,6 +25,7 @@
 [ext_resource type="AudioStream" uid="uid://do46qwqc2u7rr" path="res://audio/music_3_fast.mp3" id="18_6nequ"]
 [ext_resource type="AudioStream" uid="uid://d054a61o1csin" path="res://audio/sfx_move.mp3" id="19_7r8tr"]
 [ext_resource type="AudioStream" uid="uid://bvgc21bypsc1a" path="res://audio/sfx_rotate.mp3" id="20_jpcdp"]
+[ext_resource type="Script" path="res://scripts/options.gd" id="26_2iadd"]
 
 [node name="main" type="Node2D"]
 
@@ -454,3 +455,7 @@ stream = ExtResource("19_7r8tr")
 
 [node name="sfx_rotate" type="AudioStreamPlayer2D" parent="audio"]
 stream = ExtResource("20_jpcdp")
+
+[node name="options" type="Node2D" parent="."]
+process_mode = 3
+script = ExtResource("26_2iadd")
