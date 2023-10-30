@@ -26,3 +26,9 @@ Read my blog posts explaining why I structured the project this way and what I t
 * Make sure you have installed the prerequisites for [building Godot from source](https://docs.godotengine.org/en/stable/contributing/development/compiling/index.html).
 * Run `build.cmd` in Windows command prompt to build the editor.
 * Run `run.cmd` in Windows command prompt to open the project in the Godot editor.
+
+## Attribution
+
+I used [this Nintendo Tetris AI blogpost](https://meatfighter.com/nintendotetrisai/) for reference on SNES Tetris simulation behavior and sprites.
+
+I got the SFX and music from [Zophar's Domain](https://www.zophar.net/music/nintendo-nes-nsf/tetris-1989-Nintendo).
